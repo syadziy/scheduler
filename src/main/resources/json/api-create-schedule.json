@@ -1,0 +1,54 @@
+{
+  "name": "Create schedule",
+  "method": "POST",
+  "url": "http://localhost:9002/api/v1/schedules",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer <access-token>",
+    "X-Correlation-Id": "create-daily-operations-schedule"
+  },
+  "requestVariants": {
+    "taskTarget": {
+      "name": "Refresh cache every five minutes",
+      "targetType": "TASK",
+      "taskId": "c13e1893-bb7a-46db-9555-ac70d3db0080",
+      "groupId": null,
+      "cronExpression": "0 */5 * * * *",
+      "zoneId": "Asia/Jakarta",
+      "enabled": true
+    },
+    "groupTarget": {
+      "name": "Daily operations schedule",
+      "targetType": "GROUP",
+      "taskId": null,
+      "groupId": "31d07328-cbb4-49b2-98ee-6f6137dcde70",
+      "cronExpression": "0 0 2 * * *",
+      "zoneId": "Asia/Jakarta",
+      "enabled": true
+    }
+  },
+  "notes": [
+    "Cron expressions use six Spring fields: second minute hour day-of-month month day-of-week.",
+    "TASK requires taskId and forbids groupId.",
+    "GROUP requires groupId and forbids taskId."
+  ],
+  "response": {
+    "httpStatus": 201,
+    "headers": {
+      "Location": "/api/v1/schedules/4f7bbcf5-4843-4638-8f77-a0b10c4debe6"
+    },
+    "body": {
+      "code": "RC-201",
+      "message": "created",
+      "data": {
+        "scheduleId": "4f7bbcf5-4843-4638-8f77-a0b10c4debe6",
+        "name": "Daily operations schedule",
+        "targetType": "GROUP",
+        "targetId": "31d07328-cbb4-49b2-98ee-6f6137dcde70",
+        "nextExecutionAt": "2026-08-09T19:00:00Z",
+        "createdAt": "2026-08-09T01:10:00Z"
+      },
+      "errors": null
+    }
+  }
+}

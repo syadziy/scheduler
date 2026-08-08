@@ -102,6 +102,9 @@ cd ../scheduler
 Port lokal default adalah `9002`. Profile `local` menonaktifkan autentikasi SDK kecuali
 di-override.
 
+Dokumentasi JSON untuk seluruh REST API tersedia di `src/main/resources/json/index.json`. Setiap
+file mencakup method, URL, header, body/query, dan contoh response.
+
 ## Database
 
 Flyway membuat tabel:
@@ -382,6 +385,7 @@ src/main/java/com/mac/scheduler/
 
 src/main/resources/
 ├── db/migration/           # Flyway migrations
+├── json/                   # Indeks dan contoh seluruh REST API
 ├── application.yaml
 └── application-local.yaml
 ```

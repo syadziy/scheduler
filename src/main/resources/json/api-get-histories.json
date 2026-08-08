@@ -1,0 +1,62 @@
+{
+  "name": "Find task execution history",
+  "method": "GET",
+  "url": "http://localhost:9002/api/v1/histories",
+  "headers": {
+    "Authorization": "Bearer <access-token>",
+    "X-Correlation-Id": "query-scheduler-history"
+  },
+  "queryParameters": {
+    "date": "2026-08-09",
+    "from": null,
+    "to": null,
+    "groupId": "31d07328-cbb4-49b2-98ee-6f6137dcde70",
+    "taskId": null,
+    "thresholdExceeded": true,
+    "limit": 50,
+    "offset": 0
+  },
+  "requestExamples": [
+    "GET /api/v1/histories?date=2026-08-09&thresholdExceeded=true&limit=50&offset=0",
+    "GET /api/v1/histories?from=2026-08-09T00:00:00Z&to=2026-08-10T00:00:00Z",
+    "GET /api/v1/histories?groupId=31d07328-cbb4-49b2-98ee-6f6137dcde70",
+    "GET /api/v1/histories?taskId=c13e1893-bb7a-46db-9555-ac70d3db0080"
+  ],
+  "notes": [
+    "date cannot be combined with from or to.",
+    "Without date/from/to, the default range is the previous 24 hours.",
+    "limit defaults to 50 and cannot exceed 200.",
+    "The default maximum time range is 31 days."
+  ],
+  "response": {
+    "httpStatus": 200,
+    "body": {
+      "code": "RC-200",
+      "message": "success",
+      "data": [
+        {
+          "historyId": "14e3d8e4-a1eb-4e94-96fc-7b4f25716c00",
+          "executionId": "be1ce8cf-e78d-4c6f-9eb5-b64b058fe76e",
+          "scheduleId": "4f7bbcf5-4843-4638-8f77-a0b10c4debe6",
+          "groupId": "31d07328-cbb4-49b2-98ee-6f6137dcde70",
+          "taskId": "c13e1893-bb7a-46db-9555-ac70d3db0080",
+          "taskName": "Refresh order cache",
+          "status": "SUCCESS",
+          "startedAt": "2026-08-09T19:00:00Z",
+          "completedAt": "2026-08-09T19:00:12Z",
+          "durationMs": 12000,
+          "thresholdMs": 10000,
+          "thresholdExceeded": true,
+          "httpStatusCode": 200,
+          "errorMessage": null
+        }
+      ],
+      "errors": null,
+      "paging": {
+        "limit": 50,
+        "offset": 0,
+        "total_record": 1
+      }
+    }
+  }
+}

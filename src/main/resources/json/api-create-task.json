@@ -1,0 +1,39 @@
+{
+  "name": "Create HTTP task",
+  "method": "POST",
+  "url": "http://localhost:9002/api/v1/tasks",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer <access-token>",
+    "X-Correlation-Id": "create-task-order-cache"
+  },
+  "requestBody": {
+    "name": "Refresh order cache",
+    "method": "POST",
+    "endpoint": "http://order-service:8080/internal/cache/refresh",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Internal-Client": "scheduler"
+    },
+    "requestBody": "{\"scope\":\"all\"}",
+    "timeout": "PT30S",
+    "threshold": "PT10S",
+    "enabled": true
+  },
+  "response": {
+    "httpStatus": 201,
+    "headers": {
+      "Location": "/api/v1/tasks/c13e1893-bb7a-46db-9555-ac70d3db0080"
+    },
+    "body": {
+      "code": "RC-201",
+      "message": "created",
+      "data": {
+        "taskId": "c13e1893-bb7a-46db-9555-ac70d3db0080",
+        "name": "Refresh order cache",
+        "createdAt": "2026-08-09T01:00:00Z"
+      },
+      "errors": null
+    }
+  }
+}

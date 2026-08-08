@@ -1,0 +1,26 @@
+{
+  "service": "scheduler-service",
+  "baseUrl": "http://localhost:9002",
+  "restApis": [
+    {
+      "method": "POST",
+      "path": "/api/v1/tasks",
+      "example": "api-create-task.json"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/task-groups",
+      "example": "api-create-task-group.json"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/schedules",
+      "example": "api-create-schedule.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/histories",
+      "example": "api-get-histories.json"
+    }
+  ]
+}

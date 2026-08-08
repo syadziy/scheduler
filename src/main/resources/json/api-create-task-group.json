@@ -1,0 +1,62 @@
+{
+  "name": "Create task group",
+  "method": "POST",
+  "url": "http://localhost:9002/api/v1/task-groups",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer <access-token>",
+    "X-Correlation-Id": "create-daily-operations-group"
+  },
+  "requestVariants": {
+    "directTasks": {
+      "name": "Order synchronization",
+      "executionMode": "PARALLEL",
+      "taskIds": [
+        "c13e1893-bb7a-46db-9555-ac70d3db0080",
+        "65358cbb-84e4-4349-9992-11e142996e8c"
+      ],
+      "groupIds": [],
+      "enabled": true
+    },
+    "nestedGroup": {
+      "name": "Daily operations",
+      "executionMode": "SERIAL",
+      "taskIds": [
+        "a0f86f91-8e10-45ac-8897-a7e1c0497570"
+      ],
+      "groupIds": [
+        "8c997e62-5165-4a07-a37d-9488bf12b7d9"
+      ],
+      "enabled": true
+    }
+  },
+  "notes": [
+    "At least one taskIds or groupIds member is required.",
+    "The maximum hierarchy depth is five group levels including the root group.",
+    "SERIAL runs direct taskIds first, followed by groupIds.",
+    "PARALLEL submits direct tasks and child groups concurrently."
+  ],
+  "response": {
+    "httpStatus": 201,
+    "headers": {
+      "Location": "/api/v1/task-groups/31d07328-cbb4-49b2-98ee-6f6137dcde70"
+    },
+    "body": {
+      "code": "RC-201",
+      "message": "created",
+      "data": {
+        "groupId": "31d07328-cbb4-49b2-98ee-6f6137dcde70",
+        "name": "Daily operations",
+        "executionMode": "SERIAL",
+        "taskIds": [
+          "a0f86f91-8e10-45ac-8897-a7e1c0497570"
+        ],
+        "groupIds": [
+          "8c997e62-5165-4a07-a37d-9488bf12b7d9"
+        ],
+        "createdAt": "2026-08-09T01:05:00Z"
+      },
+      "errors": null
+    }
+  }
+}
