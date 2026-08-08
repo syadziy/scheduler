@@ -1,8 +1,14 @@
+# =========================
+# LOCAL SDK OVERRIDES
+# =========================
 sdk:
   security:
     enabled: ${SDK_SECURITY_ENABLED:false}
     method-security-enabled: ${SDK_METHOD_SECURITY_ENABLED:false}
 
+# =========================
+# LOCAL LOGGING OVERRIDES
+# =========================
 logging:
   level:
     com.mac.scheduler: DEBUG

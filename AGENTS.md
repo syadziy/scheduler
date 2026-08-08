@@ -129,6 +129,10 @@ mvn -Dtest=ScheduleExecutionServiceTest test
 - The polling job is a boundary; it must delegate claim and execution logic.
 - Use constructor injection, never field injection.
 - Bind settings under `scheduler.*`; keep secrets externalized.
+- Organize every application YAML by major property group and precede each group with the
+  three-line banner used in this repository (`# =========================`, an uppercase section
+  name, and the same separator). Separate sections with one blank line and never change property
+  hierarchy merely for formatting.
 - Do not duplicate `sdk-util` response, global exception, security, logging, or OpenAPI setup.
 - Keep the engine conditional on `scheduler.engine.enabled`.
 - Never hold the claim transaction open during HTTP execution.

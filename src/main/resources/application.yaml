@@ -10,6 +10,10 @@ spring:
     locale-resolver: fixed
   messages:
     fallback-to-system-locale: false
+
+  # =========================
+  # DATABASE
+  # =========================
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/scheduler}
     username: ${DB_USERNAME:admin}
@@ -23,11 +27,19 @@ spring:
       validation-timeout: 5000
       idle-timeout: 600000
       max-lifetime: 1800000
+
+  # =========================
+  # FLYWAY
+  # =========================
   flyway:
     enabled: true
     locations: classpath:db/migration
     validate-on-migrate: true
     clean-disabled: true
+
+  # =========================
+  # KAFKA
+  # =========================
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
@@ -38,6 +50,9 @@ spring:
       properties:
         enable.idempotence: true
 
+# =========================
+# SERVER
+# =========================
 server:
   port: ${SERVER_PORT:9002}
   shutdown: graceful
@@ -51,6 +66,9 @@ server:
     mime-types: application/json,application/problem+json,text/plain,text/css,application/javascript
     min-response-size: 1024
 
+# =========================
+# CENTRALIZED SCHEDULER CONFIG
+# =========================
 scheduler:
   engine:
     enabled: ${SCHEDULER_ENABLED:true}
@@ -87,6 +105,9 @@ scheduler:
     source-system: ${SCHEDULER_AUDIT_SOURCE_SYSTEM:SCHEDULER-SERVICE}
     fallback-actor-id: ${SCHEDULER_AUDIT_FALLBACK_ACTOR_ID:scheduler-service}
 
+# =========================
+# SHARED SDK
+# =========================
 sdk:
   timezone: ${APP_TIMEZONE:Asia/Jakarta}
   web:
@@ -123,12 +144,18 @@ sdk:
     description: REST API for HTTP task scheduling and execution monitoring
     version: 1.0.0
 
+# =========================
+# JWT CONVERTER
+# =========================
 jwt:
   auth:
     converter:
       principle-attribute: preferred_username
       resource-id: scheduler
 
+# =========================
+# MANAGEMENT / ACTUATOR
+# =========================
 management:
   endpoints:
     web:
@@ -144,6 +171,9 @@ management:
       application: ${spring.application.name}
       environment: ${SPRING_PROFILES_ACTIVE:local}
 
+# =========================
+# LOGGING
+# =========================
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
