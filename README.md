@@ -363,13 +363,14 @@ CORS is disabled by default for this service.
 ## Pengujian
 
 ```bash
-mvn test
+mvn clean verify
 ```
 
 Unit test mencakup perhitungan cron, validasi task, validasi target schedule, filter tanggal,
 perilaku group serial/paralel, nested execution, dan batas kedalaman group. Integration test
 PostgreSQL/Flyway berjalan melalui Testcontainers ketika Docker tersedia dan dilewati jika Docker
-tidak tersedia.
+tidak tersedia. Laporan JaCoCo tersedia di `target/site/jacoco/index.html`; build gagal bila line
+coverage business production code kurang dari 90%.
 
 ## Struktur project
 

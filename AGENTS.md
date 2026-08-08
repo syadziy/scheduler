@@ -217,6 +217,22 @@ MapStruct without an intentional project-wide decision.
 
 Every behavior change needs focused tests.
 
+### Unit Test Coverage Standard
+
+- Unit-test line coverage must be at least 90% for production business code.
+- New or changed business logic must maintain at least 90% line coverage before a task is
+  considered complete.
+- Measure coverage with JaCoCo when reporting or enforcing the percentage; never estimate coverage
+  from the number of tests.
+- Coverage scope must include controllers, services, repositories, jobs, exception handlers, and
+  business utilities. Pure DTOs, enums, generated code, and trivial Spring bootstrap/configuration
+  classes may be excluded when the exclusion is explicit and justified.
+- Do not add meaningless assertions, invoke code without verifying outcomes, or weaken exclusions
+  merely to reach the target. Cover success, validation, failure, retry/recovery, concurrency, and
+  boundary behavior according to the risk of the changed code.
+- If the 90% target cannot be verified because JaCoCo is not configured or a required external
+  dependency is unavailable, report that limitation explicitly; do not claim the target passed.
+
 - Unit-test cron and timezone calculation.
 - Test task endpoint/header/duration validation.
 - Test serial order and real parallel behavior.
