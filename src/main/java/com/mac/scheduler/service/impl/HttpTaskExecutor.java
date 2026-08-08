@@ -2,13 +2,15 @@ package com.mac.scheduler.service.impl;
 
 import com.mac.scheduler.entities.constant.ExecutionStatus;
 import com.mac.scheduler.entities.constant.SchedulerLogFields;
+import com.mac.scheduler.entities.model.ErrorAlert;
 import com.mac.scheduler.entities.model.ScheduleDefinition;
 import com.mac.scheduler.entities.model.ScheduledTask;
 import com.mac.scheduler.entities.model.TaskExecutionResult;
 import com.mac.scheduler.repository.TaskHistoryRepository;
+import com.mac.scheduler.service.ErrorAlertNotifier;
+import com.mac.scheduler.service.HttpTransport;
 import com.mac.scheduler.service.TaskExecutor;
 import com.mac.scheduler.service.ThresholdAlertNotifier;
-import com.mac.scheduler.service.HttpTransport;
 import com.mac.sdk_util.entities.constant.LogFields;
 import com.mac.sdk_util.utils.StructuredLog;
 import java.io.IOException;
@@ -33,6 +35,7 @@ public class HttpTaskExecutor implements TaskExecutor {
     private final HttpTransport httpTransport;
     private final TaskHistoryRepository historyRepository;
     private final ThresholdAlertNotifier thresholdAlertNotifier;
+    private final ErrorAlertNotifier errorAlertNotifier;
     private final Semaphore executionPermits;
     private final Clock clock;
 
@@ -40,11 +43,13 @@ public class HttpTaskExecutor implements TaskExecutor {
             HttpTransport httpTransport,
             TaskHistoryRepository historyRepository,
             ThresholdAlertNotifier thresholdAlertNotifier,
+            ErrorAlertNotifier errorAlertNotifier,
             Semaphore executionPermits,
             Clock clock) {
         this.httpTransport = httpTransport;
         this.historyRepository = historyRepository;
         this.thresholdAlertNotifier = thresholdAlertNotifier;
+        this.errorAlertNotifier = errorAlertNotifier;
         this.executionPermits = executionPermits;
         this.clock = clock;
     }
@@ -131,6 +136,10 @@ public class HttpTaskExecutor implements TaskExecutor {
         logResult(result, failureCause);
         if (thresholdExceeded) {
             thresholdAlertNotifier.send(result);
+        }
+        if (status == ExecutionStatus.FAILED) {
+            errorAlertNotifier.send(ErrorAlert.failure(
+                    executionId.toString(), "task-execution", "executeHttpTask"));
         }
         return result;
     }

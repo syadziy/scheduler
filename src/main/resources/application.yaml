@@ -28,6 +28,15 @@ spring:
     locations: classpath:db/migration
     validate-on-migrate: true
     clean-disabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 10
+      properties:
+        enable.idempotence: true
 
 server:
   port: ${SERVER_PORT:9002}
@@ -64,6 +73,19 @@ scheduler:
     recipients: ${THRESHOLD_ALERT_RECIPIENTS:ops@example.com}
     authorization-header: ${THRESHOLD_ALERT_AUTHORIZATION_HEADER:}
     timeout: ${THRESHOLD_ALERT_TIMEOUT:PT10S}
+  error-alert:
+    enabled: ${SCHEDULER_ERROR_ALERT_ENABLED:true}
+    endpoint: ${CENTRALIZED_ALERT_URL:http://localhost:9001/api/v1/alert}
+    sender-email: ${SCHEDULER_ERROR_ALERT_SENDER_EMAIL:scheduler@example.com}
+    sender-name: ${SCHEDULER_ERROR_ALERT_SENDER_NAME:Centralized Scheduler}
+    recipients: ${SCHEDULER_ERROR_ALERT_RECIPIENTS:ops@example.com}
+    authorization-header: ${SCHEDULER_ERROR_ALERT_AUTHORIZATION_HEADER:}
+    timeout: ${SCHEDULER_ERROR_ALERT_TIMEOUT:PT10S}
+  audit:
+    enabled: ${SCHEDULER_AUDIT_ENABLED:true}
+    topic: ${SCHEDULER_AUDIT_TOPIC:centralized-audit.requested}
+    source-system: ${SCHEDULER_AUDIT_SOURCE_SYSTEM:SCHEDULER-SERVICE}
+    fallback-actor-id: ${SCHEDULER_AUDIT_FALLBACK_ACTOR_ID:scheduler-service}
 
 sdk:
   timezone: ${APP_TIMEZONE:Asia/Jakarta}

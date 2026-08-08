@@ -4,13 +4,15 @@
 
 `scheduler` adalah Java 21/Spring Boot 4.1 service untuk menjadwalkan HTTP task, menjalankan task
 group secara serial atau paralel termasuk nested group maksimum lima level, menyimpan execution
-history, dan mengirim threshold alert ke `centralized_alert`.
+history, memublikasikan create audit ke Kafka, dan mengirim threshold/error alert ke
+`centralized_alert`.
 
 Stack utama:
 
 - Java 21 dan virtual threads
 - Spring Boot 4.1.0 dan Maven
 - Spring MVC dan Jakarta Validation
+- Spring Kafka untuk outbound audit event
 - Spring JDBC, PostgreSQL, dan Flyway
 - Java `HttpClient`
 - `sdk-util` response, exception, security, OpenAPI, ECS logging, trace ID, dan MDC
@@ -32,7 +34,7 @@ Prioritas desain:
 
 ```text
 src/main/java/com/mac/scheduler/
-├── config/properties/      # Engine, HTTP, and threshold-alert settings
+├── config/properties/      # Engine, HTTP, Kafka audit, and alert settings
 ├── controller/             # Management and monitoring REST boundaries
 ├── entities/
 │   ├── constant/           # Execution modes, statuses, methods, log fields
@@ -183,6 +185,10 @@ MapStruct without an intentional project-wide decision.
 - Catch broad exceptions only at polling, virtual-thread, HTTP-client, or alert-client boundaries.
 - Persist a safe English error summary; keep detailed stack traces only in structured internal logs.
 - Threshold alert failure must not overwrite the original task result.
+- Publish successful task, group, and schedule creation to the audit Kafka topic. Kafka publish
+  failure must be logged and reported through a sanitized centralized error alert.
+- Report terminal HTTP 5xx, scheduler/virtual-thread, and task-execution failures to
+  `centralized_alert`; alert delivery remains best effort and must not replace the original result.
 - Never silently swallow Future, scheduler, or execution-state failures.
 
 ---

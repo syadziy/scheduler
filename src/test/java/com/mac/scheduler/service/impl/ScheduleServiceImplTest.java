@@ -2,6 +2,8 @@ package com.mac.scheduler.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.mac.scheduler.entities.constant.HttpMethod;
 import com.mac.scheduler.entities.constant.ScheduleTargetType;
@@ -13,6 +15,7 @@ import com.mac.scheduler.entities.model.TaskGroup;
 import com.mac.scheduler.repository.ScheduleRepository;
 import com.mac.scheduler.repository.TaskGroupRepository;
 import com.mac.scheduler.repository.TaskRepository;
+import com.mac.scheduler.service.AuditEventPublisher;
 import com.mac.sdk_util.exception.ResourceNotFoundException;
 import java.net.URI;
 import java.time.Clock;
@@ -35,10 +38,12 @@ class ScheduleServiceImplTest {
     private InMemoryScheduleRepository scheduleRepository;
     private Optional<ScheduledTask> existingTask;
     private ScheduleServiceImpl service;
+    private AuditEventPublisher auditEventPublisher;
 
     @BeforeEach
     void setUp() {
         scheduleRepository = new InMemoryScheduleRepository();
+        auditEventPublisher = mock(AuditEventPublisher.class);
         existingTask = Optional.empty();
         TaskRepository taskRepository = new TaskRepository() {
             @Override
@@ -75,7 +80,8 @@ class ScheduleServiceImplTest {
                 taskRepository,
                 groupRepository,
                 new ScheduleCalculator(),
-                Clock.fixed(NOW, ZoneOffset.UTC));
+                Clock.fixed(NOW, ZoneOffset.UTC),
+                auditEventPublisher);
     }
 
     @Test
@@ -94,6 +100,8 @@ class ScheduleServiceImplTest {
         assertThat(response.targetId()).isEqualTo(TASK_ID);
         assertThat(response.nextExecutionAt()).isEqualTo(Instant.parse("2026-08-09T02:00:00Z"));
         assertThat(scheduleRepository.inserted).isNotNull();
+        verify(auditEventPublisher).publishCreated(
+                "SCHEDULER_SCHEDULE_CREATED", "SCHEDULER_SCHEDULE", response.scheduleId());
     }
 
     @Test

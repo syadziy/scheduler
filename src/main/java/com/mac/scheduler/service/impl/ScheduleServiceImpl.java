@@ -7,6 +7,7 @@ import com.mac.scheduler.entities.model.ScheduleDefinition;
 import com.mac.scheduler.repository.ScheduleRepository;
 import com.mac.scheduler.repository.TaskGroupRepository;
 import com.mac.scheduler.repository.TaskRepository;
+import com.mac.scheduler.service.AuditEventPublisher;
 import com.mac.scheduler.service.ScheduleService;
 import com.mac.sdk_util.exception.ResourceNotFoundException;
 import java.time.Clock;
@@ -24,18 +25,21 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final TaskGroupRepository groupRepository;
     private final ScheduleCalculator calculator;
     private final Clock clock;
+    private final AuditEventPublisher auditEventPublisher;
 
     public ScheduleServiceImpl(
             ScheduleRepository scheduleRepository,
             TaskRepository taskRepository,
             TaskGroupRepository groupRepository,
             ScheduleCalculator calculator,
-            Clock clock) {
+            Clock clock,
+            AuditEventPublisher auditEventPublisher) {
         this.scheduleRepository = scheduleRepository;
         this.taskRepository = taskRepository;
         this.groupRepository = groupRepository;
         this.calculator = calculator;
         this.clock = clock;
+        this.auditEventPublisher = auditEventPublisher;
     }
 
     @Override
@@ -60,6 +64,8 @@ public class ScheduleServiceImpl implements ScheduleService {
                 now,
                 now);
         scheduleRepository.insert(schedule);
+        auditEventPublisher.publishCreated(
+                "SCHEDULER_SCHEDULE_CREATED", "SCHEDULER_SCHEDULE", schedule.id());
         UUID targetId = schedule.targetType() == ScheduleTargetType.TASK
                 ? schedule.taskId()
                 : schedule.groupId();

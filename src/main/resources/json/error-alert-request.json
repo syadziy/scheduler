@@ -1,0 +1,25 @@
+{
+  "direction": "outbound",
+  "method": "POST",
+  "url": "http://localhost:9001/api/v1/alert",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer <service-token>",
+    "X-Correlation-Id": "9c43e2c1-4220-4ff6-8078-fb7413d62fb6"
+  },
+  "requestBody": {
+    "sourceSystem": "SCHEDULER-SERVICE",
+    "idempotencyKey": "scheduler-error-executeHttpTask-9c43e2c1-4220-4ff6-8078-fb7413d62fb6",
+    "correlationId": "9c43e2c1-4220-4ff6-8078-fb7413d62fb6",
+    "senderEmail": "scheduler@example.com",
+    "senderName": "Centralized Scheduler",
+    "subject": "Scheduler service error",
+    "body": "The scheduler service failed while performing 'executeHttpTask' at the task-execution boundary. Trace ID: 9c43e2c1-4220-4ff6-8078-fb7413d62fb6.",
+    "bodyType": "TEXT",
+    "priority": 1,
+    "recipients": [
+      { "type": "TO", "email": "ops@example.com" }
+    ],
+    "attachments": []
+  }
+}

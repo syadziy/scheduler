@@ -17,6 +17,9 @@ alert ketika durasi task melewati threshold.
 - Menyimpan status HTTP, durasi, threshold, error aman, dan trace/execution ID.
 - Memfilter history berdasarkan tanggal, rentang waktu, group, task, dan threshold breach.
 - Mengirim threshold alert ke `centralized_alert` menggunakan idempotency key per history.
+- Mempublikasikan audit event Kafka setelah task, task group, atau schedule berhasil dibuat.
+- Mengirim error dari HTTP, scheduler/virtual thread, task execution, dan Kafka publisher ke
+  `centralized_alert` melalui REST API.
 - Menggunakan `sdk-util` untuk response envelope, global exception, security, OpenAPI, ECS log,
   trace ID, dan MDC.
 - Menyediakan Actuator, Prometheus metrics, Flyway migration, dan graceful shutdown.
@@ -69,8 +72,10 @@ idempotency.
 - JDK 21
 - Maven
 - PostgreSQL
+- Kafka
 - Latest local `sdk-util:1.0.0`
-- Optional: `centralized_alert` for threshold notification
+- `audit_log` consumer for create-event audit storage
+- `centralized_alert` for threshold and error notification
 - Optional: OAuth2 issuer when SDK security is enabled
 
 Install the sibling SDK first:
@@ -310,6 +315,27 @@ Alert delivery failure is logged but does not change the original task result. C
 token through `THRESHOLD_ALERT_AUTHORIZATION_HEADER` when the alert endpoint requires OAuth2. The
 value is never written to logs.
 
+## Integrasi audit dan error alert
+
+Setelah insert create berhasil, scheduler mengirim event `SUCCESS` ke topic
+`centralized-audit.requested` untuk action berikut:
+
+- `SCHEDULER_TASK_CREATED` / `SCHEDULER_TASK`
+- `SCHEDULER_TASK_GROUP_CREATED` / `SCHEDULER_TASK_GROUP`
+- `SCHEDULER_SCHEDULE_CREATED` / `SCHEDULER_SCHEDULE`
+
+Kafka key memakai `eventId`; `resourceId` berisi ID entity yang dibuat. Actor diambil dari
+authenticated principal, atau `scheduler-service` jika tidak tersedia. Publish dilakukan async
+setelah insert dan bersifat best effort, bukan transactional outbox. Jika broker menolak publish,
+scheduler mencatat structured error dan mengirim error alert.
+
+Error alert priority 1 dikirim melalui `POST /api/v1/alert` untuk response HTTP 5xx, exception HTTP
+yang keluar dari filter chain, kegagalan scheduler/virtual thread, kegagalan HTTP task, dan kegagalan
+Kafka publisher. Error validation/4xx tidak menghasilkan alert. Delivery alert tidak mengubah hasil
+operasi asli; timeout, connection error, atau response non-2xx hanya dicatat. Body alert tidak memuat
+exception detail, token, atau request/response body. Contoh payload tersedia di
+`src/main/resources/json/kafka-create-audit-event.json` dan `error-alert-request.json`.
+
 ## Konfigurasi utama
 
 | Property | Default | Description |
@@ -327,6 +353,12 @@ value is never written to logs.
 | `scheduler.threshold-alert.enabled` | `true` | Enable threshold alert |
 | `scheduler.threshold-alert.endpoint` | `http://localhost:9001/api/v1/alert` | Alert API URL |
 | `scheduler.threshold-alert.recipients` | `ops@example.com` | Recipient list |
+| `spring.kafka.bootstrap-servers` | `localhost:9092` | Kafka brokers for audit events |
+| `scheduler.audit.enabled` | `true` | Enable create-event audit publishing |
+| `scheduler.audit.topic` | `centralized-audit.requested` | Audit event topic |
+| `scheduler.error-alert.enabled` | `true` | Enable centralized failure alerts |
+| `scheduler.error-alert.endpoint` | `http://localhost:9001/api/v1/alert` | Error alert API URL |
+| `scheduler.error-alert.recipients` | `ops@example.com` | Error alert recipient list |
 | `sdk.timezone` | `Asia/Jakarta` | Date filter/application timezone |
 
 Set `execution-timeout` longer than the maximum legitimate group execution time. A value that is

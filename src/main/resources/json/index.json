@@ -22,5 +22,17 @@
       "path": "/api/v1/histories",
       "example": "api-get-histories.json"
     }
+  ],
+  "outboundIntegrations": [
+    {
+      "transport": "Kafka",
+      "destination": "centralized-audit.requested",
+      "example": "kafka-create-audit-event.json"
+    },
+    {
+      "transport": "HTTP",
+      "destination": "centralized_alert /api/v1/alert",
+      "example": "error-alert-request.json"
+    }
   ]
 }

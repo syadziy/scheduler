@@ -161,8 +161,11 @@ class BoundaryCoverageTest {
         assertSame(first, second.getCause());
         assertEquals(HttpStatus.CONFLICT,
                 new SchedulerExceptionHandler().handleConflict(first).getStatusCode());
-        new AsyncExceptionHandler().handle(null, "dataset", "test", "run", null, first);
-        new AsyncExceptionHandler().handle("trace", "dataset", "test", "run", Map.of("id", 1), first);
+        ErrorAlertNotifier notifier = mock(ErrorAlertNotifier.class);
+        new AsyncExceptionHandler(notifier).handle(null, "dataset", "test", "run", null, first);
+        new AsyncExceptionHandler(notifier).handle(
+                "trace", "dataset", "test", "run", Map.of("id", 1), first);
+        verify(notifier, times(2)).send(any(ErrorAlert.class));
         assertFalse(new WorkerIdentity().value().isBlank());
     }
 

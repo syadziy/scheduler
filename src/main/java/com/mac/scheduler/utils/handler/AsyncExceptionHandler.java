@@ -1,5 +1,7 @@
 package com.mac.scheduler.utils.handler;
 
+import com.mac.scheduler.entities.model.ErrorAlert;
+import com.mac.scheduler.service.ErrorAlertNotifier;
 import com.mac.sdk_util.entities.constant.LogFields;
 import com.mac.sdk_util.utils.StructuredLog;
 import java.util.LinkedHashMap;
@@ -13,6 +15,11 @@ import org.springframework.stereotype.Component;
 public class AsyncExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(AsyncExceptionHandler.class);
+    private final ErrorAlertNotifier alertNotifier;
+
+    public AsyncExceptionHandler(ErrorAlertNotifier alertNotifier) {
+        this.alertNotifier = alertNotifier;
+    }
 
     public void handle(
             String traceId,
@@ -41,5 +48,7 @@ public class AsyncExceptionHandler {
         StructuredLog.withMdc(
                 context,
                 () -> StructuredLog.error(LOG, "Asynchronous operation failed", fields, exception));
+        alertNotifier.send(ErrorAlert.failure(
+                context.get(LogFields.TRACE_ID), source, action));
     }
 }
