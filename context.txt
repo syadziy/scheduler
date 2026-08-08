@@ -1,0 +1,19 @@
+saya ingin membuat aplikasi scheduler dengan java 21
+fitur utama scheduler ini bisa membuat group scheduler di mana ketika task berada dalam satu group bisa 
+di setting jalan serial atau paralel.
+
+setiap task bisa memanggil endpoint api dari service lain.
+setiap task yang dijalankan juga akan disimpan secara historical berapa lama task tersebut dijalankan,
+tambahkan fitur threshold untuk masing-masing task agar ketika task berjalan melebihi threshold akan 
+mengirim alert dengan integrasi dengan centralized_alert.
+
+buat rest api untuk pembuatan task, pembuatan group task, serta pembuatan scheduler (bisa task ataupun group task)
+serta buat api untuk get historical dengan filter untuk kebutuhan monitoring 
+(dashboard web).
+
+berikut filter yang dapat dijadikan parameter:
+- tanggal yang dipilih
+- tanggal dan waktu yang dipilih
+- group id
+- task id
+- task yang lebih dari threshold

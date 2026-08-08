@@ -1,0 +1,135 @@
+spring:
+  application:
+    name: scheduler-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  web:
+    locale: en
+    locale-resolver: fixed
+  messages:
+    fallback-to-system-locale: false
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/scheduler}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: scheduler-pool
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      connection-timeout: 30000
+      validation-timeout: 5000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    clean-disabled: true
+
+server:
+  port: ${SERVER_PORT:9002}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+  compression:
+    enabled: true
+    mime-types: application/json,application/problem+json,text/plain,text/css,application/javascript
+    min-response-size: 1024
+
+scheduler:
+  engine:
+    enabled: ${SCHEDULER_ENABLED:true}
+    poll-interval: ${SCHEDULER_POLL_INTERVAL:PT5S}
+    execution-timeout: ${SCHEDULER_EXECUTION_TIMEOUT:PT1H}
+    claim-batch-size: ${SCHEDULER_CLAIM_BATCH_SIZE:20}
+    max-parallelism: ${SCHEDULER_MAX_PARALLELISM:50}
+  http:
+    connect-timeout: ${SCHEDULER_HTTP_CONNECT_TIMEOUT:PT5S}
+    default-read-timeout: ${SCHEDULER_HTTP_READ_TIMEOUT:PT30S}
+    max-read-timeout: ${SCHEDULER_HTTP_MAX_READ_TIMEOUT:PT10M}
+    allowed-hosts: ${SCHEDULER_ALLOWED_HOSTS:}
+  history:
+    max-range: ${SCHEDULER_HISTORY_MAX_RANGE:P31D}
+  threshold-alert:
+    enabled: ${THRESHOLD_ALERT_ENABLED:true}
+    endpoint: ${CENTRALIZED_ALERT_URL:http://localhost:9001/api/v1/alert}
+    sender-email: ${THRESHOLD_ALERT_SENDER_EMAIL:scheduler@example.com}
+    sender-name: ${THRESHOLD_ALERT_SENDER_NAME:Centralized Scheduler}
+    recipients: ${THRESHOLD_ALERT_RECIPIENTS:ops@example.com}
+    authorization-header: ${THRESHOLD_ALERT_AUTHORIZATION_HEADER:}
+    timeout: ${THRESHOLD_ALERT_TIMEOUT:PT10S}
+
+sdk:
+  timezone: ${APP_TIMEZONE:Asia/Jakarta}
+  web:
+    exception-handler:
+      enabled: true
+  logging:
+    structured:
+      enabled: true
+      format: ecs
+      auto-configure-format: true
+      trace-header: X-Correlation-Id
+      trace-response-header: true
+    aspect:
+      enabled: true
+      packages: com.mac.scheduler.service,com.mac.scheduler.repository
+  security:
+    enabled: ${SDK_SECURITY_ENABLED:true}
+    csrf-disabled: true
+    jwt-issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8080/realms/scheduler}
+    session-creation-policy: STATELESS
+    permit-all-paths:
+      - /actuator/health/**
+      - /actuator/info/**
+      - /v3/api-docs/**
+      - /swagger-ui.html
+      - /swagger-ui/**
+      - /error
+    method-security-enabled: ${SDK_METHOD_SECURITY_ENABLED:true}
+    cors:
+      enabled: ${SDK_CORS_ENABLED:false}
+  openapi:
+    enabled: true
+    title: Centralized Scheduler API
+    description: REST API for HTTP task scheduling and execution monitoring
+    version: 1.0.0
+
+jwt:
+  auth:
+    converter:
+      principle-attribute: preferred_username
+      resource-id: scheduler
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${SPRING_PROFILES_ACTIVE:local}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.mac.scheduler: ${LOG_LEVEL_APPLICATION:INFO}
+  structured:
+    format:
+      console: ecs
+      file: ecs
+    ecs:
+      service:
+        environment: ${SPRING_PROFILES_ACTIVE:local}
