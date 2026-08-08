@@ -4,7 +4,7 @@ Centralized Scheduler adalah service Java 21/Spring Boot 4.1 untuk menjalankan H
 cron, mengelompokkan task secara serial atau paralel, menyimpan execution history, dan mengirim
 alert ketika durasi task melewati threshold.
 
-## Main features
+## Fitur utama
 
 - Membuat HTTP task untuk method `GET`, `POST`, `PUT`, `PATCH`, atau `DELETE`.
 - Membuat task group dengan mode `SERIAL` atau `PARALLEL`.
@@ -20,9 +20,9 @@ alert ketika durasi task melewati threshold.
   trace ID, dan MDC.
 - Menyediakan Actuator, Prometheus metrics, Flyway migration, dan graceful shutdown.
 
-## Technology
+## Teknologi
 
-| Component | Version/implementation |
+| Komponen | Versi/implementasi |
 | --- | --- |
 | Java | 21 |
 | Spring Boot | 4.1.0 |
@@ -33,7 +33,7 @@ alert ketika durasi task melewati threshold.
 | Schedule expression | Spring six-field cron expression |
 | Shared SDK | `com.mac:sdk-util:1.0.0` |
 
-## Execution model
+## Model eksekusi
 
 ```text
 Cron schedule due
@@ -57,12 +57,13 @@ Persist one history row per task
        └── duration > threshold: send centralized alert
 ```
 
-The database occurrence prevents two healthy instances from claiming the same schedule run.
-Delivery to a target API is at-least-once around crash recovery: if a worker crashes after sending
-HTTP but before completing its execution row, the execution can be retried after
-`scheduler.engine.execution-timeout`. Target endpoints should therefore support idempotency.
+Occurrence yang tersimpan di database mencegah dua instance sehat mengambil schedule run yang
+sama. Pemanggilan target API memiliki semantik at-least-once saat crash recovery: jika worker
+berhenti setelah mengirim HTTP tetapi sebelum menyelesaikan execution row, eksekusi dapat diulang
+setelah `scheduler.engine.execution-timeout`. Karena itu, target endpoint sebaiknya mendukung
+idempotency.
 
-## Prerequisites
+## Prasyarat
 
 - JDK 21
 - Maven
@@ -79,25 +80,30 @@ mvn clean install
 cd ../scheduler
 ```
 
-## Build and run
+## Menjalankan secara lokal
 
-```bash
-mvn clean verify
-mvn spring-boot:run
-```
+1. Buat database PostgreSQL:
 
-Default local port is `9002`. The `local` profile disables SDK authentication unless overridden.
-Copy values from `.env.example` into your environment; do not commit `.env`.
+   ```sql
+   CREATE DATABASE scheduler;
+   ```
+
+2. Salin konfigurasi yang diperlukan dari `.env.example` ke environment shell. Jangan commit
+   `.env` atau credential task.
+
+3. Jalankan build dan aplikasi:
+
+   ```bash
+   mvn clean verify
+   mvn spring-boot:run
+   ```
+
+Port lokal default adalah `9002`. Profile `local` menonaktifkan autentikasi SDK kecuali
+di-override.
 
 ## Database
 
-Create a PostgreSQL database before starting:
-
-```sql
-CREATE DATABASE scheduler;
-```
-
-Flyway creates:
+Flyway membuat tabel:
 
 - `scheduler_task`
 - `scheduler_task_group`
@@ -106,12 +112,12 @@ Flyway creates:
 - `scheduler_execution`
 - `scheduler_task_history`
 
-Hibernate schema generation is not used. Add a new versioned Flyway migration for every schema
-change.
+Hibernate schema generation tidak digunakan. Tambahkan migration Flyway versi baru untuk setiap
+perubahan schema.
 
-## API response
+## Format response API
 
-Every endpoint returns the shared SDK envelope:
+Setiap endpoint mengembalikan envelope dari shared SDK:
 
 ```json
 {
@@ -122,9 +128,21 @@ Every endpoint returns the shared SDK envelope:
 }
 ```
 
-Messages owned by this service are in English.
+Message yang dimiliki service ini selalu menggunakan bahasa Inggris.
 
-## Create a task
+## Ringkasan API
+
+| Method | Endpoint | Fungsi |
+| --- | --- | --- |
+| `POST` | `/api/v1/tasks` | Membuat definisi HTTP task |
+| `POST` | `/api/v1/task-groups` | Membuat group serial atau paralel |
+| `POST` | `/api/v1/schedules` | Menjadwalkan task atau group |
+| `GET` | `/api/v1/histories` | Mencari task execution history |
+
+Client dapat mengirim header `X-Correlation-Id`. SDK akan membuat nilai baru jika header tidak
+tersedia dan mengembalikannya pada response.
+
+## Membuat task
 
 `POST /api/v1/tasks`
 
@@ -150,7 +168,7 @@ cannot be supplied by a task.
 When `scheduler.http.allowed-hosts` is non-empty, the endpoint host must match one of the configured
 hosts. Embedded credentials and non-HTTP(S) URLs are rejected.
 
-## Create a task group
+## Membuat task group
 
 `POST /api/v1/task-groups`
 
@@ -172,7 +190,7 @@ still enforces `scheduler.engine.max-parallelism`.
 
 Duplicate or unknown task IDs are rejected.
 
-## Create a schedule
+## Membuat schedule
 
 `POST /api/v1/schedules`
 
@@ -212,7 +230,7 @@ second minute hour day-of-month month day-of-week
 
 Exactly one target ID must match `targetType`.
 
-## Query execution history
+## Mencari execution history
 
 `GET /api/v1/histories`
 
@@ -243,7 +261,7 @@ GET /api/v1/histories?taskId=c13e1893-bb7a-46db-9555-ac70d3db0080
 
 The result includes paging metadata and is ordered from newest execution.
 
-## Threshold alert integration
+## Integrasi threshold alert
 
 When `durationMs > thresholdMs`, the service sends `POST` to the configured centralized alert URL.
 The payload uses:
@@ -258,7 +276,7 @@ Alert delivery failure is logged but does not change the original task result. C
 token through `THRESHOLD_ALERT_AUTHORIZATION_HEADER` when the alert endpoint requires OAuth2. The
 value is never written to logs.
 
-## Main configuration
+## Konfigurasi utama
 
 | Property | Default | Description |
 | --- | --- | --- |
@@ -280,7 +298,7 @@ value is never written to logs.
 Set `execution-timeout` longer than the maximum legitimate group execution time. A value that is
 too short can cause a still-running occurrence to be reclaimed by another instance.
 
-## Logging and monitoring
+## Logging dan monitoring
 
 - Logs use ECS structured JSON.
 - HTTP requests receive/return `X-Correlation-Id` through `sdk-util`.
@@ -308,12 +326,32 @@ The local profile disables security for development. The application overrides t
 public-path defaults and exposes only health/info/OpenAPI/error paths without authentication.
 CORS is disabled by default for this service.
 
-## Tests
+## Pengujian
 
 ```bash
 mvn test
 ```
 
-Unit tests cover cron calculation, task validation, schedule target validation, date filtering, and
-serial/parallel group behavior. The PostgreSQL/Flyway integration test runs through Testcontainers
-when Docker is available and is skipped otherwise.
+Unit test mencakup perhitungan cron, validasi task, validasi target schedule, filter tanggal, serta
+perilaku group serial/paralel. Integration test PostgreSQL/Flyway berjalan melalui Testcontainers
+ketika Docker tersedia dan dilewati jika Docker tidak tersedia.
+
+## Struktur project
+
+```text
+src/main/java/com/mac/scheduler/
+├── config/                 # Runtime bean dan type-safe properties
+├── controller/             # Management dan history REST API
+├── entities/               # Constant, DTO, dan internal model
+├── job/                    # Polling boundary
+├── repository/             # JDBC persistence dan execution lease
+├── service/                # Task, group, schedule, execution, HTTP, alert, history
+└── utils/                  # Worker identity dan boundary exception handlers
+
+src/main/resources/
+├── db/migration/           # Flyway migrations
+├── application.yaml
+└── application-local.yaml
+```
+
+Panduan kontribusi, durability, logging, security, dan testing tersedia pada `AGENTS.md`.
