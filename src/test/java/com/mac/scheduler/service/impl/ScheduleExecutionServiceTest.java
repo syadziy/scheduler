@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,6 +51,7 @@ class ScheduleExecutionServiceTest {
                         GroupExecutionMode.SERIAL,
                         true,
                         tasks,
+                        List.of(),
                         NOW,
                         NOW),
                 taskExecutor);
@@ -72,6 +74,7 @@ class ScheduleExecutionServiceTest {
                         GroupExecutionMode.PARALLEL,
                         true,
                         tasks,
+                        List.of(),
                         NOW,
                         NOW),
                 taskExecutor);
@@ -80,6 +83,39 @@ class ScheduleExecutionServiceTest {
 
         assertThat(status).isEqualTo(ExecutionStatus.SUCCESS);
         assertThat(taskExecutor.names).containsExactlyInAnyOrder("first", "second", "third");
+        assertThat(taskExecutor.maxActive.get()).isGreaterThan(1);
+    }
+
+    @Test
+    void executesNestedGroupUsingEachGroupsExecutionMode() {
+        TaskGroup child = new TaskGroup(
+                CHILD_GROUP_ID,
+                "Parallel child",
+                GroupExecutionMode.PARALLEL,
+                true,
+                List.of(task("child-first"), task("child-second")),
+                List.of(),
+                NOW,
+                NOW);
+        TaskGroup root = new TaskGroup(
+                GROUP_ID,
+                "Serial root",
+                GroupExecutionMode.SERIAL,
+                true,
+                List.of(task("root")),
+                List.of(child),
+                NOW,
+                NOW);
+        RecordingTaskExecutor taskExecutor = new RecordingTaskExecutor();
+
+        ExecutionStatus status = serviceFor(root, taskExecutor).execute(execution());
+
+        assertThat(status).isEqualTo(ExecutionStatus.SUCCESS);
+        assertThat(taskExecutor.names.getFirst()).isEqualTo("root");
+        assertThat(taskExecutor.names).containsExactlyInAnyOrder("root", "child-first", "child-second");
+        assertThat(taskExecutor.groupIds.get("root")).isEqualTo(GROUP_ID);
+        assertThat(taskExecutor.groupIds.get("child-first")).isEqualTo(CHILD_GROUP_ID);
+        assertThat(taskExecutor.groupIds.get("child-second")).isEqualTo(CHILD_GROUP_ID);
         assertThat(taskExecutor.maxActive.get()).isGreaterThan(1);
     }
 
@@ -102,7 +138,10 @@ class ScheduleExecutionServiceTest {
         };
         TaskGroupRepository groupRepository = new TaskGroupRepository() {
             @Override
-            public TaskGroup insert(TaskGroup value, List<UUID> taskIds) {
+            public TaskGroup insert(
+                    TaskGroup value,
+                    List<UUID> taskIds,
+                    List<UUID> groupIds) {
                 throw new UnsupportedOperationException();
             }
 
@@ -154,6 +193,7 @@ class ScheduleExecutionServiceTest {
         private final AtomicInteger active = new AtomicInteger();
         private final AtomicInteger maxActive = new AtomicInteger();
         private final List<String> names = new CopyOnWriteArrayList<>();
+        private final Map<String, UUID> groupIds = new ConcurrentHashMap<>();
 
         @Override
         public TaskExecutionResult execute(
@@ -164,6 +204,7 @@ class ScheduleExecutionServiceTest {
             int current = active.incrementAndGet();
             maxActive.accumulateAndGet(current, Math::max);
             names.add(task.name());
+            groupIds.put(task.name(), groupId);
             try {
                 Thread.sleep(Duration.ofMillis(100));
             } catch (InterruptedException exception) {
@@ -192,6 +233,7 @@ class ScheduleExecutionServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-08-09T00:00:00Z");
     private static final UUID GROUP_ID = UUID.fromString("dd58240d-cfaf-44e0-b4ab-fc10f9389f95");
+    private static final UUID CHILD_GROUP_ID = UUID.fromString("c472a8d4-0ac2-431a-a597-169299c14933");
     private static final UUID SCHEDULE_ID = UUID.fromString("2f56cbab-cf10-48a0-909d-a8d74452822f");
     private static final UUID EXECUTION_ID = UUID.fromString("66cbde86-84fc-4ad8-bcb8-411696f7fd62");
 }

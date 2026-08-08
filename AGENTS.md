@@ -3,8 +3,8 @@
 ## Project Overview
 
 `scheduler` adalah Java 21/Spring Boot 4.1 service untuk menjadwalkan HTTP task, menjalankan task
-group secara serial atau paralel, menyimpan execution history, dan mengirim threshold alert ke
-`centralized_alert`.
+group secara serial atau paralel termasuk nested group maksimum lima level, menyimpan execution
+history, dan mengirim threshold alert ke `centralized_alert`.
 
 Stack utama:
 
@@ -165,6 +165,7 @@ MapStruct without an intentional project-wide decision.
 - Insert a unique schedule occurrence before advancing `next_execution_at`.
 - Keep `(schedule_id, scheduled_for)` unique.
 - Keep `(execution_id, task_id)` unique for task history.
+- Preserve nested-group relations in `scheduler_group_group` and the five-level depth limit.
 - Claim/lease operations must be short transactions.
 - HTTP calls must run outside transactions.
 - Verify one-row state transitions where exactly one update is expected.
@@ -205,6 +206,8 @@ MapStruct without an intentional project-wide decision.
   the service layer.
 - A TASK schedule accepts only `taskId`; a GROUP schedule accepts only `groupId`.
 - Reject duplicate/unknown task IDs in a group.
+- Reject duplicate/unknown child groups, circular/shared group branches, repeated tasks across a
+  hierarchy, and nesting deeper than five group levels.
 - Reject date combined with from/to history filters.
 - Keep client-facing messages in English.
 
@@ -217,6 +220,7 @@ Every behavior change needs focused tests.
 - Unit-test cron and timezone calculation.
 - Test task endpoint/header/duration validation.
 - Test serial order and real parallel behavior.
+- Test nested group execution, owning group history IDs, cycles, duplicates, and depth limits.
 - Test claim materialization, stale lease recovery, and completion transitions.
 - Test history date/range/group/task/threshold filters.
 - Test non-2xx, timeout, interruption, and threshold alert behavior.

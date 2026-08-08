@@ -7,7 +7,10 @@ import java.util.UUID;
 
 public interface TaskGroupRepository {
 
-    TaskGroup insert(TaskGroup group, List<UUID> orderedTaskIds);
+    TaskGroup insert(
+            TaskGroup group,
+            List<UUID> orderedTaskIds,
+            List<UUID> orderedChildGroupIds);
 
     Optional<TaskGroup> findById(UUID groupId);
 }

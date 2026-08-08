@@ -8,6 +8,7 @@ alert ketika durasi task melewati threshold.
 
 - Membuat HTTP task untuk method `GET`, `POST`, `PUT`, `PATCH`, atau `DELETE`.
 - Membuat task group dengan mode `SERIAL` atau `PARALLEL`.
+- Menyusun nested task group sampai maksimum lima level.
 - Membuat cron schedule untuk satu task atau satu task group.
 - Menyimpan occurrence schedule secara durable sebelum execution.
 - Mendukung multi-instance claim melalui PostgreSQL `FOR UPDATE SKIP LOCKED`.
@@ -108,6 +109,7 @@ Flyway membuat tabel:
 - `scheduler_task`
 - `scheduler_task_group`
 - `scheduler_group_task`
+- `scheduler_group_group`
 - `scheduler_schedule`
 - `scheduler_execution`
 - `scheduler_task_history`
@@ -180,15 +182,44 @@ hosts. Embedded credentials and non-HTTP(S) URLs are rejected.
     "c13e1893-bb7a-46db-9555-ac70d3db0080",
     "65358cbb-84e4-4349-9992-11e142996e8c"
   ],
+  "groupIds": [],
   "enabled": true
 }
 ```
 
-For `SERIAL`, task order follows `taskIds`. A failed HTTP result is recorded and the next task still
-runs. For `PARALLEL`, all enabled tasks are submitted concurrently, while the global semaphore
-still enforces `scheduler.engine.max-parallelism`.
+`taskIds` atau `groupIds` dapat dikosongkan, tetapi minimal salah satunya harus memiliki member.
+Request lama yang hanya mengirim `taskIds` tetap didukung.
 
-Duplicate or unknown task IDs are rejected.
+Contoh nested group:
+
+```json
+{
+  "name": "Daily operations",
+  "executionMode": "SERIAL",
+  "taskIds": [
+    "c13e1893-bb7a-46db-9555-ac70d3db0080"
+  ],
+  "groupIds": [
+    "8c997e62-5165-4a07-a37d-9488bf12b7d9"
+  ],
+  "enabled": true
+}
+```
+
+Aturan eksekusi dan nesting:
+
+- Maksimum kedalaman adalah lima level group, termasuk root group.
+- `SERIAL` menjalankan direct task sesuai urutan `taskIds`, kemudian child group sesuai urutan
+  `groupIds`. Setiap child group mengikuti `executionMode` miliknya sendiri.
+- `PARALLEL` menjalankan direct task dan child group secara bersamaan. Global semaphore tetap
+  membatasi HTTP concurrency melalui `scheduler.engine.max-parallelism`.
+- Child group yang disabled dilewati.
+- Circular reference, child group berulang, dan task yang muncul lebih dari sekali dalam satu
+  hierarchy ditolak.
+- Maksimum total direct member (`taskIds` + `groupIds`) adalah 100.
+- HTTP failure dicatat dan tidak menghentikan direct member berikutnya pada group `SERIAL`.
+
+Task/group ID yang duplikat atau tidak ditemukan akan ditolak.
 
 ## Membuat schedule
 
@@ -332,9 +363,10 @@ CORS is disabled by default for this service.
 mvn test
 ```
 
-Unit test mencakup perhitungan cron, validasi task, validasi target schedule, filter tanggal, serta
-perilaku group serial/paralel. Integration test PostgreSQL/Flyway berjalan melalui Testcontainers
-ketika Docker tersedia dan dilewati jika Docker tidak tersedia.
+Unit test mencakup perhitungan cron, validasi task, validasi target schedule, filter tanggal,
+perilaku group serial/paralel, nested execution, dan batas kedalaman group. Integration test
+PostgreSQL/Flyway berjalan melalui Testcontainers ketika Docker tersedia dan dilewati jika Docker
+tidak tersedia.
 
 ## Struktur project
 

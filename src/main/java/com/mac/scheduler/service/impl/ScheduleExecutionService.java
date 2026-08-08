@@ -21,6 +21,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -109,40 +111,55 @@ public class ScheduleExecutionService {
         if (!group.enabled()) {
             throw new IllegalStateException("Scheduled task group is disabled");
         }
-        List<ScheduledTask> enabledTasks = group.tasks().stream()
-                .filter(ScheduledTask::enabled)
-                .toList();
-        if (enabledTasks.isEmpty()) {
+        List<TaskExecutionResult> results = executeGroupDefinition(group, schedule, executionId);
+        if (results.isEmpty()) {
             throw new IllegalStateException("Scheduled task group has no enabled tasks");
         }
+        return results;
+    }
+
+    private List<TaskExecutionResult> executeGroupDefinition(
+            TaskGroup group,
+            ScheduleDefinition schedule,
+            UUID executionId) {
+        if (!group.enabled()) {
+            return List.of();
+        }
+        List<Supplier<List<TaskExecutionResult>>> operations = new ArrayList<>();
+        group.tasks().stream()
+                .filter(ScheduledTask::enabled)
+                .map(task -> (Supplier<List<TaskExecutionResult>>) () -> List.of(
+                        taskExecutor.execute(task, schedule, executionId, group.id())))
+                .forEach(operations::add);
+        group.groups().stream()
+                .filter(TaskGroup::enabled)
+                .map(childGroup -> (Supplier<List<TaskExecutionResult>>) () ->
+                        executeGroupDefinition(childGroup, schedule, executionId))
+                .forEach(operations::add);
         if (group.executionMode() == GroupExecutionMode.SERIAL) {
-            return enabledTasks.stream()
-                    .map(task -> taskExecutor.execute(task, schedule, executionId, group.id()))
+            return operations.stream()
+                    .flatMap(operation -> operation.get().stream())
                     .toList();
         }
-        return executeParallel(enabledTasks, schedule, executionId, group.id());
+        return executeParallel(operations);
     }
 
     private List<TaskExecutionResult> executeParallel(
-            List<ScheduledTask> tasks,
-            ScheduleDefinition schedule,
-            UUID executionId,
-            UUID groupId) {
+            List<Supplier<List<TaskExecutionResult>>> operations) {
         Map<String, String> parentContext = StructuredLog.copyMdc();
-        List<Future<TaskExecutionResult>> futures = tasks.stream()
-                .map(task -> executor.submit(() -> {
-                    final TaskExecutionResult[] result = new TaskExecutionResult[1];
+        List<Future<List<TaskExecutionResult>>> futures = operations.stream()
+                .map(operation -> executor.submit(() -> {
+                    AtomicReference<List<TaskExecutionResult>> result = new AtomicReference<>();
                     StructuredLog.withMdc(
                             parentContext,
-                            () -> result[0] = taskExecutor.execute(
-                                    task, schedule, executionId, groupId));
-                    return result[0];
+                            () -> result.set(operation.get()));
+                    return result.get();
                 }))
                 .toList();
-        List<TaskExecutionResult> results = new ArrayList<>(futures.size());
-        for (Future<TaskExecutionResult> future : futures) {
+        List<TaskExecutionResult> results = new ArrayList<>();
+        for (Future<List<TaskExecutionResult>> future : futures) {
             try {
-                results.add(future.get());
+                results.addAll(future.get());
             } catch (InterruptedException exception) {
                 Thread.currentThread().interrupt();
                 futures.forEach(item -> item.cancel(true));

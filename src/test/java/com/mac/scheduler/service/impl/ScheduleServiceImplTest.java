@@ -58,7 +58,10 @@ class ScheduleServiceImplTest {
         };
         TaskGroupRepository groupRepository = new TaskGroupRepository() {
             @Override
-            public TaskGroup insert(TaskGroup group, List<UUID> taskIds) {
+            public TaskGroup insert(
+                    TaskGroup group,
+                    List<UUID> taskIds,
+                    List<UUID> groupIds) {
                 throw new UnsupportedOperationException();
             }
 

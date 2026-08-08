@@ -10,4 +10,5 @@ public record CreateTaskGroupResponse(
         String name,
         GroupExecutionMode executionMode,
         List<UUID> taskIds,
+        List<UUID> groupIds,
         Instant createdAt) {}

@@ -49,12 +49,13 @@ class SchedulerDatabaseIntegrationTest {
                       'scheduler_task',
                       'scheduler_task_group',
                       'scheduler_group_task',
+                      'scheduler_group_group',
                       'scheduler_schedule',
                       'scheduler_execution',
                       'scheduler_task_history'
                   )
                 """, Integer.class);
 
-        assertThat(tableCount).isEqualTo(6);
+        assertThat(tableCount).isEqualTo(7);
     }
 }

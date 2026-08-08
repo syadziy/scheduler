@@ -13,9 +13,11 @@ import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -36,7 +38,10 @@ public class TaskGroupRepositoryImpl implements TaskGroupRepository {
 
     @Override
     @Transactional
-    public TaskGroup insert(TaskGroup group, List<UUID> orderedTaskIds) {
+    public TaskGroup insert(
+            TaskGroup group,
+            List<UUID> orderedTaskIds,
+            List<UUID> orderedChildGroupIds) {
         try {
             jdbcTemplate.update("""
                     INSERT INTO scheduler_task_group (
@@ -59,6 +64,16 @@ public class TaskGroupRepositoryImpl implements TaskGroupRepository {
                         .addValue("taskId", orderedTaskIds.get(index))
                         .addValue("sequenceNo", index + 1));
             }
+            for (int index = 0; index < orderedChildGroupIds.size(); index++) {
+                jdbcTemplate.update("""
+                        INSERT INTO scheduler_group_group (
+                            parent_group_id, child_group_id, sequence_no
+                        ) VALUES (:parentGroupId, :childGroupId, :sequenceNo)
+                        """, new MapSqlParameterSource()
+                        .addValue("parentGroupId", group.id())
+                        .addValue("childGroupId", orderedChildGroupIds.get(index))
+                        .addValue("sequenceNo", index + 1));
+            }
             return group;
         } catch (DuplicateKeyException exception) {
             throw new SchedulerConflictException(
@@ -69,6 +84,19 @@ public class TaskGroupRepositoryImpl implements TaskGroupRepository {
 
     @Override
     public Optional<TaskGroup> findById(UUID groupId) {
+        return findById(groupId, 1, new LinkedHashSet<>());
+    }
+
+    private Optional<TaskGroup> findById(
+            UUID groupId,
+            int depth,
+            Set<UUID> path) {
+        if (depth > TaskGroup.MAX_NESTING_DEPTH) {
+            throw new IllegalStateException("Stored task group hierarchy exceeds 5 levels");
+        }
+        if (!path.add(groupId)) {
+            throw new IllegalStateException("Stored task group hierarchy contains a cycle");
+        }
         List<TaskGroup> groups = jdbcTemplate.query("""
                 SELECT id, name, execution_mode, enabled, created_at, updated_at
                 FROM scheduler_task_group
@@ -79,18 +107,42 @@ public class TaskGroupRepositoryImpl implements TaskGroupRepository {
                 GroupExecutionMode.valueOf(resultSet.getString("execution_mode")),
                 resultSet.getBoolean("enabled"),
                 List.of(),
+                List.of(),
                 resultSet.getTimestamp("created_at").toInstant(),
                 resultSet.getTimestamp("updated_at").toInstant()));
-        return groups.stream()
-                .findFirst()
-                .map(group -> new TaskGroup(
-                        group.id(),
-                        group.name(),
-                        group.executionMode(),
-                        group.enabled(),
-                        findTasks(groupId),
-                        group.createdAt(),
-                        group.updatedAt()));
+        try {
+            return groups.stream()
+                    .findFirst()
+                    .map(group -> new TaskGroup(
+                            group.id(),
+                            group.name(),
+                            group.executionMode(),
+                            group.enabled(),
+                            findTasks(groupId),
+                            findChildGroups(groupId, depth, path),
+                            group.createdAt(),
+                            group.updatedAt()));
+        } finally {
+            path.remove(groupId);
+        }
+    }
+
+    private List<TaskGroup> findChildGroups(
+            UUID parentGroupId,
+            int parentDepth,
+            Set<UUID> path) {
+        List<UUID> childGroupIds = jdbcTemplate.query("""
+                SELECT child_group_id
+                FROM scheduler_group_group
+                WHERE parent_group_id = :parentGroupId
+                ORDER BY sequence_no
+                """, Map.of("parentGroupId", parentGroupId),
+                (resultSet, rowNumber) -> resultSet.getObject("child_group_id", UUID.class));
+        return childGroupIds.stream()
+                .map(childGroupId -> findById(childGroupId, parentDepth + 1, path)
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Nested task group no longer exists: " + childGroupId)))
+                .toList();
     }
 
     private List<ScheduledTask> findTasks(UUID groupId) {

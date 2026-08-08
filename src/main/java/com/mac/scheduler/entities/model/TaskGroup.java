@@ -11,10 +11,14 @@ public record TaskGroup(
         GroupExecutionMode executionMode,
         boolean enabled,
         List<ScheduledTask> tasks,
+        List<TaskGroup> groups,
         Instant createdAt,
         Instant updatedAt) {
 
+    public static final int MAX_NESTING_DEPTH = 5;
+
     public TaskGroup {
         tasks = tasks == null ? List.of() : List.copyOf(tasks);
+        groups = groups == null ? List.of() : List.copyOf(groups);
     }
 }
