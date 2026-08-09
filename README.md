@@ -407,8 +407,9 @@ sdk:
 ```
 
 The local profile disables security for development. The application overrides the broad SDK
-public-path defaults and exposes only health/info/OpenAPI/error paths without authentication.
-CORS is disabled by default for this service.
+public-path defaults and exposes `/internal/**` plus health/info/OpenAPI/error paths without
+authentication. `/internal/**` must be isolated using network policy or service mesh and must not
+be exposed by a public ingress. CORS is disabled by default for this service.
 
 `sdk-util` mengambil public signing key dari JWKS `usermanagement` dan memetakan claim `roles` serta
 `permissions` menjadi authority `ROLE_*` dan `PERM_*`.

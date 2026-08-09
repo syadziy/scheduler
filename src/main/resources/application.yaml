@@ -133,6 +133,7 @@ sdk:
     jwt-issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:9005}
     session-creation-policy: STATELESS
     permit-all-paths:
+      - /internal/**
       - /actuator/health/**
       - /actuator/info/**
       - /v3/api-docs/**
