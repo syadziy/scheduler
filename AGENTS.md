@@ -297,7 +297,8 @@ Current contracts:
 - Use `scheduler.http.allowed-hosts` in production to reduce SSRF risk.
 - Do not allow tasks to override `Host`, `Content-Length`, or `X-Correlation-Id`.
 - Target services must still authenticate and authorize scheduler requests.
-- Restrict SDK public paths and CORS explicitly.
+- Do not declare or override `sdk.security.permit-all-paths` in this service. The canonical public
+  path policy is owned by `sdk_util`; CORS remains an explicit service configuration.
 - Keep task request bodies and headers out of logs/history responses.
 - Treat changes to stored headers or outbound authentication as security-sensitive.
 
