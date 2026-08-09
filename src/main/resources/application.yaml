@@ -17,7 +17,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/scheduler}
     username: ${DB_USERNAME:admin}
-    password: ${DB_PASSWORD:admin}
+    password: ${DB_PASSWORD:admin_macbook}
     driver-class-name: org.postgresql.Driver
     hikari:
       pool-name: scheduler-pool
@@ -34,6 +34,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    baseline-on-migrate: false
     validate-on-migrate: true
     clean-disabled: true
 
@@ -56,6 +57,8 @@ spring:
 server:
   port: ${SERVER_PORT:9002}
   shutdown: graceful
+  servlet:
+    context-path: /
   error:
     include-message: never
     include-binding-errors: never
