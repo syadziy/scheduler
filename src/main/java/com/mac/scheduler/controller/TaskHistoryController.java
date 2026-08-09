@@ -6,7 +6,8 @@ import com.mac.scheduler.entities.model.HistoryFilter;
 import com.mac.scheduler.service.HistoryService;
 import com.mac.sdk_util.entities.dto.PagingDTO;
 import com.mac.sdk_util.entities.dto.ResponseDTO;
-import com.mac.sdk_util.utils.ResponsePagingHelper;
+import com.mac.sdk_util.entities.constant.Role;
+import com.mac.sdk_util.helper.ResponsePagingHelper;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.time.Clock;
@@ -47,7 +48,7 @@ public class TaskHistoryController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('PERM_scheduler:read')")
+    @PreAuthorize(Role.SCHEDULER_READ)
     public ResponseEntity<ResponseDTO<List<TaskHistoryResponse>>> findHistory(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

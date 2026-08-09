@@ -2,7 +2,7 @@ package com.mac.scheduler.utils.handler;
 
 import com.mac.scheduler.utils.exception.SchedulerConflictException;
 import com.mac.sdk_util.entities.dto.ResponseDTO;
-import com.mac.sdk_util.utils.ResponseHelper;
+import com.mac.sdk_util.helper.ResponseHelper;
 import java.util.Map;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

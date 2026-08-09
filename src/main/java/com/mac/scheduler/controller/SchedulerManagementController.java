@@ -10,7 +10,8 @@ import com.mac.scheduler.service.ScheduleService;
 import com.mac.scheduler.service.TaskGroupService;
 import com.mac.scheduler.service.TaskService;
 import com.mac.sdk_util.entities.dto.ResponseDTO;
-import com.mac.sdk_util.utils.ResponseHelper;
+import com.mac.sdk_util.entities.constant.Role;
+import com.mac.sdk_util.helper.ResponseHelper;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class SchedulerManagementController {
     }
 
     @PostMapping("/tasks")
-    @PreAuthorize("hasAuthority('PERM_scheduler:manage')")
+    @PreAuthorize(Role.SCHEDULER_MANAGE)
     public ResponseEntity<ResponseDTO<CreateTaskResponse>> createTask(
             @Valid @RequestBody CreateTaskRequest request) {
         CreateTaskResponse response = taskService.create(request);
@@ -48,7 +49,7 @@ public class SchedulerManagementController {
     }
 
     @PostMapping("/task-groups")
-    @PreAuthorize("hasAuthority('PERM_scheduler:manage')")
+    @PreAuthorize(Role.SCHEDULER_MANAGE)
     public ResponseEntity<ResponseDTO<CreateTaskGroupResponse>> createTaskGroup(
             @Valid @RequestBody CreateTaskGroupRequest request) {
         CreateTaskGroupResponse response = groupService.create(request);
@@ -58,7 +59,7 @@ public class SchedulerManagementController {
     }
 
     @PostMapping("/schedules")
-    @PreAuthorize("hasAuthority('PERM_scheduler:manage')")
+    @PreAuthorize(Role.SCHEDULER_MANAGE)
     public ResponseEntity<ResponseDTO<CreateScheduleResponse>> createSchedule(
             @Valid @RequestBody CreateScheduleRequest request) {
         CreateScheduleResponse response = scheduleService.create(request);
