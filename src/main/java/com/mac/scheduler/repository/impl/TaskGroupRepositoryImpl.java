@@ -6,9 +6,6 @@ import com.mac.scheduler.entities.model.ScheduledTask;
 import com.mac.scheduler.entities.model.TaskGroup;
 import com.mac.scheduler.repository.TaskGroupRepository;
 import com.mac.scheduler.utils.exception.SchedulerConflictException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +21,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Repository
 public class TaskGroupRepositoryImpl implements TaskGroupRepository {
@@ -172,7 +172,7 @@ public class TaskGroupRepositoryImpl implements TaskGroupRepository {
                     resultSet.getBoolean("enabled"),
                     resultSet.getTimestamp("created_at").toInstant(),
                     resultSet.getTimestamp("updated_at").toInstant());
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Stored task headers cannot be read", exception);
         }
     }

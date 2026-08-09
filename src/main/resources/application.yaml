@@ -129,7 +129,7 @@ sdk:
   security:
     enabled: ${SDK_SECURITY_ENABLED:true}
     csrf-disabled: true
-    jwt-issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8080/realms/scheduler}
+    jwt-issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8080/realms/boilerplate}
     session-creation-policy: STATELESS
     permit-all-paths:
       - /actuator/health/**

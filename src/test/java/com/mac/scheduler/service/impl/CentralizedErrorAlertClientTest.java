@@ -2,7 +2,6 @@ package com.mac.scheduler.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mac.scheduler.config.properties.ErrorAlertProperties;
 import com.mac.scheduler.entities.model.ErrorAlert;
 import com.mac.scheduler.service.HttpTransport;
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class CentralizedErrorAlertClientTest {
 

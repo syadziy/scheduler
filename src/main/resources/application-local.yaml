@@ -1,14 +1,22 @@
-# =========================
+## =========================
 # LOCAL SDK OVERRIDES
 # =========================
 sdk:
   security:
-    enabled: ${SDK_SECURITY_ENABLED:false}
-    method-security-enabled: ${SDK_METHOD_SECURITY_ENABLED:false}
+    enabled: false
+    method-security-enabled: false
+    cors:
+      enabled: false
 
-# =========================
-# LOCAL LOGGING OVERRIDES
-# =========================
+  # =========================
+  # LOCAL LOGGING OVERRIDES
+  # =========================
+  logging:
+    structured:
+      enabled: true
+      auto-configure-format: false
+
 logging:
-  level:
-    com.mac.scheduler: DEBUG
+  structured:
+    format:
+      console: ""

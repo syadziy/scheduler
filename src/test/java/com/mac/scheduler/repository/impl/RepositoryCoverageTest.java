@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mac.scheduler.entities.constant.*;
 import com.mac.scheduler.entities.model.*;
 import com.mac.scheduler.utils.exception.SchedulerConflictException;
@@ -20,6 +18,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 class RepositoryCoverageTest {
 
@@ -48,12 +49,12 @@ class RepositoryCoverageTest {
         assertThrows(SchedulerConflictException.class, () -> repository.insert(task));
 
         ObjectMapper broken = mock(ObjectMapper.class);
-        when(broken.writeValueAsString(any())).thenThrow(new JsonProcessingException("bad") {});
+        when(broken.writeValueAsString(any())).thenThrow(new JacksonException("bad") {});
         assertThrows(IllegalArgumentException.class,
                 () -> new TaskRepositoryImpl(jdbc, broken).insert(task));
 
-        when(broken.readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
-                .thenThrow(new JsonProcessingException("bad") {});
+        when(broken.readValue(anyString(), any(TypeReference.class)))
+                .thenThrow(new JacksonException("bad") {});
         TaskRepositoryImpl brokenReader = new TaskRepositoryImpl(jdbc, broken);
         when(jdbc.query(anyString(), anyMap(), any(RowMapper.class))).thenAnswer(invocation -> {
             RowMapper<ScheduledTask> rowMapper = invocation.getArgument(2);
@@ -165,8 +166,8 @@ class RepositoryCoverageTest {
                 () -> repository.insert(group, List.of(), List.of()));
 
         ObjectMapper broken = mock(ObjectMapper.class);
-        when(broken.readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
-                .thenThrow(new JsonProcessingException("bad") {});
+        when(broken.readValue(anyString(), any(TypeReference.class)))
+                .thenThrow(new JacksonException("bad") {});
         TaskGroupRepositoryImpl brokenRepository = new TaskGroupRepositoryImpl(jdbc, broken);
         reset(jdbc);
         when(jdbc.query(anyString(), anyMap(), any(RowMapper.class))).thenAnswer(invocation -> {

@@ -1,8 +1,5 @@
 package com.mac.scheduler.repository.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mac.scheduler.entities.constant.HttpMethod;
 import com.mac.scheduler.entities.model.ScheduledTask;
 import com.mac.scheduler.repository.TaskRepository;
@@ -21,6 +18,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Repository
 public class TaskRepositoryImpl implements TaskRepository {
@@ -108,7 +108,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     private String writeHeaders(Map<String, String> headers) {
         try {
             return objectMapper.writeValueAsString(headers);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalArgumentException("Task headers cannot be serialized", exception);
         }
     }
@@ -116,7 +116,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     private Map<String, String> readHeaders(String headers) {
         try {
             return objectMapper.readValue(headers, new TypeReference<>() {});
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Stored task headers cannot be read", exception);
         }
     }

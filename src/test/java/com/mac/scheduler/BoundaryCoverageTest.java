@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mac.scheduler.config.properties.ThresholdAlertProperties;
 import com.mac.scheduler.controller.SchedulerManagementController;
 import com.mac.scheduler.entities.constant.*;
@@ -26,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import tools.jackson.databind.ObjectMapper;
 
 class BoundaryCoverageTest {
 

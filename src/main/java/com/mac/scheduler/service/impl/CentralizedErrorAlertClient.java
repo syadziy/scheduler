@@ -1,7 +1,5 @@
 package com.mac.scheduler.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mac.scheduler.config.properties.ErrorAlertProperties;
 import com.mac.scheduler.entities.model.ErrorAlert;
 import com.mac.scheduler.service.ErrorAlertNotifier;
@@ -15,6 +13,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class CentralizedErrorAlertClient implements ErrorAlertNotifier {
@@ -59,7 +59,7 @@ public class CentralizedErrorAlertClient implements ErrorAlertNotifier {
         }
     }
 
-    private String payload(ErrorAlert alert) throws JsonProcessingException {
+    private String payload(ErrorAlert alert) throws JacksonException {
         List<Map<String, String>> recipients = properties.recipients().stream()
                 .map(email -> Map.of("type", "TO", "email", email))
                 .toList();

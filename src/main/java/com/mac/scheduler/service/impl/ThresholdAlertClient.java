@@ -1,7 +1,5 @@
 package com.mac.scheduler.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mac.scheduler.config.properties.ThresholdAlertProperties;
 import com.mac.scheduler.entities.constant.SchedulerLogFields;
 import com.mac.scheduler.entities.model.TaskExecutionResult;
@@ -16,6 +14,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class ThresholdAlertClient implements ThresholdAlertNotifier {
@@ -61,7 +61,7 @@ public class ThresholdAlertClient implements ThresholdAlertNotifier {
         }
     }
 
-    private String buildPayload(TaskExecutionResult result) throws JsonProcessingException {
+    private String buildPayload(TaskExecutionResult result) throws JacksonException {
         List<Map<String, String>> recipients = properties.recipients().stream()
                 .map(email -> Map.of("type", "TO", "email", email))
                 .toList();
