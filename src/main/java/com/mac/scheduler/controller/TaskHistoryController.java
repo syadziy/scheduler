@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +47,7 @@ public class TaskHistoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('PERM_scheduler:read')")
     public ResponseEntity<ResponseDTO<List<TaskHistoryResponse>>> findHistory(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

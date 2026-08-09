@@ -414,6 +414,9 @@ be exposed by a public ingress. CORS is disabled by default for this service.
 `sdk-util` mengambil public signing key dari JWKS `usermanagement` dan memetakan claim `roles` serta
 `permissions` menjadi authority `ROLE_*` dan `PERM_*`.
 
+Controller mewajibkan `PERM_scheduler:manage` untuk membuat task, task group, dan schedule, serta
+`PERM_scheduler:read` untuk membaca history.
+
 ## Pengujian
 
 ```bash

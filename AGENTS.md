@@ -125,7 +125,9 @@ mvn -Dtest=ScheduleExecutionServiceTest test
 
 ## Spring Guidelines
 
-- Controllers validate, call services, and return SDK `ResponseDTO` helpers only.
+- Controllers validate, call services, return SDK `ResponseDTO` helpers, and place
+  `@PreAuthorize` with `PERM_<resource>:<action>` on protected endpoint methods.
+- Service implementations must not carry HTTP endpoint authorization annotations.
 - Services own task/group/schedule policy and execution orchestration.
 - Repositories own SQL and result mapping.
 - The polling job is a boundary; it must delegate claim and execution logic.
