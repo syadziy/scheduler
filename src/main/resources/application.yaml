@@ -130,7 +130,7 @@ sdk:
   security:
     enabled: ${SDK_SECURITY_ENABLED:true}
     csrf-disabled: true
-    jwt-issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8080/realms/boilerplate}
+    jwt-issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:9005}
     session-creation-policy: STATELESS
     permit-all-paths:
       - /actuator/health/**
@@ -154,7 +154,7 @@ sdk:
 jwt:
   auth:
     converter:
-      principle-attribute: preferred_username
+      principle-attribute: ${JWT_PRINCIPAL_ATTRIBUTE:username}
       resource-id: scheduler
 
 # =========================

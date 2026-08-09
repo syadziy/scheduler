@@ -402,13 +402,16 @@ Production can enable SDK OAuth2/JWT security with:
 sdk:
   security:
     enabled: true
-    jwt-issuer-uri: https://identity.example.com/realms/scheduler
+    jwt-issuer-uri: http://usermanagement:9005
     method-security-enabled: true
 ```
 
 The local profile disables security for development. The application overrides the broad SDK
 public-path defaults and exposes only health/info/OpenAPI/error paths without authentication.
 CORS is disabled by default for this service.
+
+`sdk-util` mengambil public signing key dari JWKS `usermanagement` dan memetakan claim `roles` serta
+`permissions` menjadi authority `ROLE_*` dan `PERM_*`.
 
 ## Pengujian
 
