@@ -369,13 +369,13 @@ exception detail, token, atau request/response body. Contoh payload tersedia di
 | `scheduler.http.allowed-hosts` | empty | Comma-separated allowlist; empty allows any host |
 | `scheduler.history.max-range` | `P31D` | Maximum history query range |
 | `scheduler.threshold-alert.enabled` | `true` | Enable threshold alert |
-| `scheduler.threshold-alert.endpoint` | `http://localhost:9001/api/v1/alert` | Alert API URL |
+| `scheduler.threshold-alert.endpoint` | `http://localhost:9003/api/v1/alert` | Alert API URL |
 | `scheduler.threshold-alert.recipients` | `ops@example.com` | Recipient list |
 | `spring.kafka.bootstrap-servers` | `localhost:9092` | Kafka brokers for audit events |
 | `scheduler.audit.enabled` | `true` | Enable create-event audit publishing |
 | `scheduler.audit.topic` | `centralized-audit.requested` | Audit event topic |
 | `scheduler.error-alert.enabled` | `true` | Enable centralized failure alerts |
-| `scheduler.error-alert.endpoint` | `http://localhost:9001/api/v1/alert` | Error alert API URL |
+| `scheduler.error-alert.endpoint` | `http://localhost:9003/api/v1/alert` | Error alert API URL |
 | `scheduler.error-alert.recipients` | `ops@example.com` | Error alert recipient list |
 | `sdk.timezone` | `UTC` | Date filter/application timezone |
 

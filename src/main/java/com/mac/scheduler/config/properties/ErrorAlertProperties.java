@@ -21,7 +21,7 @@ public record ErrorAlertProperties(
         @NotNull Duration timeout) {
 
     public ErrorAlertProperties {
-        endpoint = endpoint == null ? URI.create("http://localhost:9001/api/v1/alert") : endpoint;
+        endpoint = endpoint == null ? URI.create("http://localhost:9003/api/v1/alert") : endpoint;
         senderEmail = senderEmail == null ? "scheduler@example.com" : senderEmail;
         senderName = senderName == null ? "Centralized Scheduler" : senderName;
         recipients = recipients == null ? List.of() : List.copyOf(recipients);

@@ -89,7 +89,7 @@ scheduler:
     max-range: ${SCHEDULER_HISTORY_MAX_RANGE:P31D}
   threshold-alert:
     enabled: ${THRESHOLD_ALERT_ENABLED:true}
-    endpoint: ${CENTRALIZED_ALERT_URL:http://localhost:9001/api/v1/alert}
+    endpoint: ${CENTRALIZED_ALERT_URL:http://localhost:9003/api/v1/alert}
     sender-email: ${THRESHOLD_ALERT_SENDER_EMAIL:scheduler@example.com}
     sender-name: ${THRESHOLD_ALERT_SENDER_NAME:Centralized Scheduler}
     recipients: ${THRESHOLD_ALERT_RECIPIENTS:ops@example.com}
@@ -97,7 +97,7 @@ scheduler:
     timeout: ${THRESHOLD_ALERT_TIMEOUT:PT10S}
   error-alert:
     enabled: ${SCHEDULER_ERROR_ALERT_ENABLED:true}
-    endpoint: ${CENTRALIZED_ALERT_URL:http://localhost:9001/api/v1/alert}
+    endpoint: ${CENTRALIZED_ALERT_URL:http://localhost:9003/api/v1/alert}
     sender-email: ${SCHEDULER_ERROR_ALERT_SENDER_EMAIL:scheduler@example.com}
     sender-name: ${SCHEDULER_ERROR_ALERT_SENDER_NAME:Centralized Scheduler}
     recipients: ${SCHEDULER_ERROR_ALERT_RECIPIENTS:ops@example.com}

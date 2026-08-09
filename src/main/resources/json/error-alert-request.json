@@ -1,7 +1,7 @@
 {
   "direction": "outbound",
   "method": "POST",
-  "url": "http://localhost:9001/api/v1/alert",
+  "url": "http://localhost:9003/api/v1/alert",
   "headers": {
     "Content-Type": "application/json",
     "Authorization": "Bearer <service-token>",
