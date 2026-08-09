@@ -101,6 +101,8 @@ mvn -Dtest=ScheduleExecutionServiceTest test
 
 - Use records for immutable DTO/model values.
 - Use `Instant`, `Duration`, `ZoneId`, and injected `Clock`.
+- Use UTC for the JVM, JDBC session, persistence, logs, and API timestamps. A schedule `zoneId`
+  may differ only because cron interpretation is an explicit business-scheduling boundary.
 - Use the configured `schedulerVirtualThreadExecutor`; never create executors in business methods.
 - Preserve interruption whenever catching `InterruptedException`.
 - Keep virtual-thread concurrency bounded through the shared semaphore.

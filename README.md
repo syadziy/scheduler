@@ -4,6 +4,10 @@ Centralized Scheduler adalah service Java 21/Spring Boot 4.1 untuk menjalankan H
 cron, mengelompokkan task secara serial atau paralel, menyimpan execution history, dan mengirim
 alert ketika durasi task melewati threshold.
 
+Runtime, JDBC session, persistence, logs, dan API timestamps menggunakan UTC secara default
+melalui `APP_TIMEZONE=UTC`. Schedule tetap dapat memakai `zoneId` lain apabila interpretasi cron
+memang membutuhkan timezone regional.
+
 ## Fitur utama
 
 - Membuat HTTP task untuk method `GET`, `POST`, `PUT`, `PATCH`, atau `DELETE`.
@@ -106,6 +110,20 @@ cd ../scheduler
 
 Port lokal default adalah `9002`. Profile `local` menonaktifkan autentikasi SDK kecuali
 di-override.
+
+## Docker
+
+Build JAR terlebih dahulu, kemudian buat runtime image Java 21:
+
+```bash
+mvn clean package
+docker build -t scheduler:1.0.0 .
+docker run --rm --env-file .env -p 9002:9002 scheduler:1.0.0
+```
+
+Isi `.env` dari `.env.example`. Gunakan hostname service Docker untuk PostgreSQL, Kafka,
+`audit_log`, `centralized_alert`, dan target internal lain; `localhost` menunjuk ke container
+scheduler sendiri.
 
 Dokumentasi JSON untuk seluruh REST API tersedia di `src/main/resources/json/index.json`. Setiap
 file mencakup method, URL, header, body/query, dan contoh response.
@@ -242,7 +260,7 @@ Task target:
   "taskId": "c13e1893-bb7a-46db-9555-ac70d3db0080",
   "groupId": null,
   "cronExpression": "0 */5 * * * *",
-  "zoneId": "Asia/Jakarta",
+  "zoneId": "UTC",
   "enabled": true
 }
 ```
@@ -256,7 +274,7 @@ Group target:
   "taskId": null,
   "groupId": "8c997e62-5165-4a07-a37d-9488bf12b7d9",
   "cronExpression": "0 0 2 * * *",
-  "zoneId": "Asia/Jakarta",
+  "zoneId": "UTC",
   "enabled": true
 }
 ```
@@ -359,7 +377,7 @@ exception detail, token, atau request/response body. Contoh payload tersedia di
 | `scheduler.error-alert.enabled` | `true` | Enable centralized failure alerts |
 | `scheduler.error-alert.endpoint` | `http://localhost:9001/api/v1/alert` | Error alert API URL |
 | `scheduler.error-alert.recipients` | `ops@example.com` | Error alert recipient list |
-| `sdk.timezone` | `Asia/Jakarta` | Date filter/application timezone |
+| `sdk.timezone` | `UTC` | Date filter/application timezone |
 
 Set `execution-timeout` longer than the maximum legitimate group execution time. A value that is
 too short can cause a still-running occurrence to be reclaimed by another instance.

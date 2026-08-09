@@ -14,7 +14,7 @@
       "taskId": "c13e1893-bb7a-46db-9555-ac70d3db0080",
       "groupId": null,
       "cronExpression": "0 */5 * * * *",
-      "zoneId": "Asia/Jakarta",
+      "zoneId": "UTC",
       "enabled": true
     },
     "groupTarget": {
@@ -23,7 +23,7 @@
       "taskId": null,
       "groupId": "31d07328-cbb4-49b2-98ee-6f6137dcde70",
       "cronExpression": "0 0 2 * * *",
-      "zoneId": "Asia/Jakarta",
+      "zoneId": "UTC",
       "enabled": true
     }
   },

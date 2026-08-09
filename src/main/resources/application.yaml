@@ -21,6 +21,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     hikari:
       pool-name: scheduler-pool
+      connection-init-sql: SET TIME ZONE 'UTC'
       minimum-idle: ${DB_POOL_MIN_IDLE:2}
       maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
       connection-timeout: 30000
@@ -112,7 +113,7 @@ scheduler:
 # SHARED SDK
 # =========================
 sdk:
-  timezone: ${APP_TIMEZONE:Asia/Jakarta}
+  timezone: ${APP_TIMEZONE:UTC}
   web:
     exception-handler:
       enabled: true
