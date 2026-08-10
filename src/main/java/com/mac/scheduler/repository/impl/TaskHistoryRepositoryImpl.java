@@ -6,6 +6,8 @@ import com.mac.scheduler.entities.model.TaskExecutionResult;
 import com.mac.scheduler.repository.TaskHistoryRepository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -48,8 +50,8 @@ public class TaskHistoryRepositoryImpl implements TaskHistoryRepository {
                 .addValue("taskId", result.taskId())
                 .addValue("taskName", result.taskName())
                 .addValue("status", result.status().name())
-                .addValue("startedAt", result.startedAt())
-                .addValue("completedAt", result.completedAt())
+                .addValue("startedAt", timestamp(result.startedAt()))
+                .addValue("completedAt", timestamp(result.completedAt()))
                 .addValue("durationMs", result.durationMs())
                 .addValue("thresholdMs", result.thresholdMs())
                 .addValue("thresholdExceeded", result.thresholdExceeded())
@@ -84,8 +86,8 @@ public class TaskHistoryRepositoryImpl implements TaskHistoryRepository {
     private Query buildFilter(HistoryFilter filter) {
         StringBuilder sql = new StringBuilder(FILTER_BASE);
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("from", filter.from())
-                .addValue("to", filter.to());
+                .addValue("from", timestamp(filter.from()))
+                .addValue("to", timestamp(filter.to()));
         List<String> predicates = new ArrayList<>();
         if (filter.groupId() != null) {
             predicates.add("group_id = :groupId");
@@ -119,6 +121,10 @@ public class TaskHistoryRepositoryImpl implements TaskHistoryRepository {
                 resultSet.getBoolean("threshold_exceeded"),
                 resultSet.getObject("http_status_code", Integer.class),
                 resultSet.getString("error_message"));
+    }
+
+    private Timestamp timestamp(Instant instant) {
+        return instant == null ? null : Timestamp.from(instant);
     }
 
     private record Query(String sql, MapSqlParameterSource parameters) {}
