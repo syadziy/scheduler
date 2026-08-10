@@ -7,6 +7,7 @@ import com.mac.scheduler.repository.ScheduleRepository;
 import com.mac.scheduler.utils.exception.SchedulerConflictException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -46,7 +47,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                         :enabled, :nextExecutionAt, :createdAt, :updatedAt
                     )
                     """, parameters(schedule)
-                    .addValue("nextExecutionAt", schedule.nextExecutionAt()));
+                    .addValue("nextExecutionAt", timestamp(schedule.nextExecutionAt())));
             return schedule;
         } catch (DuplicateKeyException exception) {
             throw new SchedulerConflictException("A schedule with the same name already exists", exception);
@@ -65,7 +66,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                 LIMIT :limit
                 """.formatted(COLUMNS),
                 new MapSqlParameterSource()
-                        .addValue("dueAt", dueAt)
+                        .addValue("dueAt", timestamp(dueAt))
                         .addValue("limit", limit),
                 this::mapSchedule);
     }
@@ -82,8 +83,8 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                 WHERE id = :id
                 """, new MapSqlParameterSource()
                 .addValue("id", schedule.id())
-                .addValue("nextExecutionAt", nextExecutionAt)
-                .addValue("updatedAt", updatedAt));
+                .addValue("nextExecutionAt", timestamp(nextExecutionAt))
+                .addValue("updatedAt", timestamp(updatedAt)));
         if (updated != 1) {
             throw new IllegalStateException("Due schedule could not be claimed: " + schedule.id());
         }
@@ -103,8 +104,8 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                 """, new MapSqlParameterSource()
                 .addValue("id", executionId)
                 .addValue("scheduleId", schedule.id())
-                .addValue("scheduledFor", scheduledFor)
-                .addValue("createdAt", createdAt));
+                .addValue("scheduledFor", timestamp(scheduledFor))
+                .addValue("createdAt", timestamp(createdAt)));
     }
 
     @Override
@@ -124,7 +125,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                 LIMIT :limit
                 """.formatted(JOINED_COLUMNS),
                 new MapSqlParameterSource()
-                        .addValue("staleBefore", staleBefore)
+                        .addValue("staleBefore", timestamp(staleBefore))
                         .addValue("limit", limit),
                 (resultSet, rowNumber) -> new ScheduledExecution(
                         resultSet.getObject("execution_id", UUID.class),
@@ -142,7 +143,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                     """, new MapSqlParameterSource()
                     .addValue("id", execution.id())
                     .addValue("workerId", workerId)
-                    .addValue("startedAt", now));
+                    .addValue("startedAt", timestamp(now)));
         }
         return List.copyOf(executions);
     }
@@ -165,7 +166,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                 """, new MapSqlParameterSource()
                 .addValue("id", executionId)
                 .addValue("status", status)
-                .addValue("completedAt", completedAt)
+                .addValue("completedAt", timestamp(completedAt))
                 .addValue("errorMessage", errorMessage)
                 .addValue("workerId", workerId));
         if (updated != 1) {
@@ -183,8 +184,12 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
                 .addValue("cronExpression", schedule.cronExpression())
                 .addValue("zoneId", schedule.zoneId().getId())
                 .addValue("enabled", schedule.enabled())
-                .addValue("createdAt", schedule.createdAt())
-                .addValue("updatedAt", schedule.updatedAt());
+                .addValue("createdAt", timestamp(schedule.createdAt()))
+                .addValue("updatedAt", timestamp(schedule.updatedAt()));
+    }
+
+    private Timestamp timestamp(Instant instant) {
+        return instant == null ? null : Timestamp.from(instant);
     }
 
     private ScheduleDefinition mapSchedule(ResultSet resultSet, int rowNumber) throws SQLException {
