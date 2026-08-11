@@ -25,7 +25,7 @@
   "notes": [
     "date cannot be combined with from or to.",
     "Without date/from/to, the default range is the previous 24 hours.",
-    "limit defaults to 50 and cannot exceed 200.",
+    "limit defaults to 500 and cannot exceed 2000.",
     "The default maximum time range is 31 days."
   ],
   "response": {

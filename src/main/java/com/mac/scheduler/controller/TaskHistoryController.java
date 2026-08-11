@@ -62,7 +62,7 @@ public class TaskHistoryController {
             @RequestParam(required = false) UUID groupId,
             @RequestParam(required = false) UUID taskId,
             @RequestParam(required = false) Boolean thresholdExceeded,
-            @RequestParam(defaultValue = "50") @Min(1) @Max(200) int limit,
+            @RequestParam(defaultValue = "500") @Min(1) @Max(2000) int limit,
             @RequestParam(defaultValue = "0") @Min(0) long offset) {
         HistoryFilter filter = createFilter(
                 date,
