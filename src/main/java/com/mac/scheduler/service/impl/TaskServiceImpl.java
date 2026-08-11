@@ -5,7 +5,6 @@ import com.mac.scheduler.entities.dto.CreateTaskRequest;
 import com.mac.scheduler.entities.dto.CreateTaskResponse;
 import com.mac.scheduler.entities.model.ScheduledTask;
 import com.mac.scheduler.repository.TaskRepository;
-import com.mac.scheduler.service.AuditEventPublisher;
 import com.mac.scheduler.service.TaskService;
 import java.net.URI;
 import java.time.Clock;
@@ -23,17 +22,14 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository repository;
     private final HttpTaskProperties properties;
     private final Clock clock;
-    private final AuditEventPublisher auditEventPublisher;
 
     public TaskServiceImpl(
             TaskRepository repository,
             HttpTaskProperties properties,
-            Clock clock,
-            AuditEventPublisher auditEventPublisher) {
+            Clock clock) {
         this.repository = repository;
         this.properties = properties;
         this.clock = clock;
-        this.auditEventPublisher = auditEventPublisher;
     }
 
     @Override
@@ -63,7 +59,6 @@ public class TaskServiceImpl implements TaskService {
                 now,
                 now);
         repository.insert(task);
-        auditEventPublisher.publishCreated("SCHEDULER_TASK_CREATED", "SCHEDULER_TASK", task.id());
         return new CreateTaskResponse(task.id(), task.name(), task.createdAt());
     }
 

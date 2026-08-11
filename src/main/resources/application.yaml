@@ -39,19 +39,6 @@ spring:
     validate-on-migrate: true
     clean-disabled: true
 
-  # =========================
-  # KAFKA
-  # =========================
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      acks: all
-      retries: 10
-      properties:
-        enable.idempotence: true
-
 # =========================
 # SERVER
 # =========================
@@ -103,12 +90,6 @@ scheduler:
     recipients: ${SCHEDULER_ERROR_ALERT_RECIPIENTS:ops@example.com}
     authorization-header: ${SCHEDULER_ERROR_ALERT_AUTHORIZATION_HEADER:}
     timeout: ${SCHEDULER_ERROR_ALERT_TIMEOUT:PT10S}
-  audit:
-    enabled: ${SCHEDULER_AUDIT_ENABLED:true}
-    topic: ${SCHEDULER_AUDIT_TOPIC:centralized-audit.requested}
-    source-system: ${SCHEDULER_AUDIT_SOURCE_SYSTEM:SCHEDULER-SERVICE}
-    fallback-actor-id: ${SCHEDULER_AUDIT_FALLBACK_ACTOR_ID:scheduler-service}
-
 # =========================
 # SHARED SDK
 # =========================

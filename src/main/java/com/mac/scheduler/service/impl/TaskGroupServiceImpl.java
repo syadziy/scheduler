@@ -6,7 +6,6 @@ import com.mac.scheduler.entities.model.ScheduledTask;
 import com.mac.scheduler.entities.model.TaskGroup;
 import com.mac.scheduler.repository.TaskGroupRepository;
 import com.mac.scheduler.repository.TaskRepository;
-import com.mac.scheduler.service.AuditEventPublisher;
 import com.mac.scheduler.service.TaskGroupService;
 import java.time.Clock;
 import java.time.Instant;
@@ -25,17 +24,14 @@ public class TaskGroupServiceImpl implements TaskGroupService {
     private final TaskGroupRepository groupRepository;
     private final TaskRepository taskRepository;
     private final Clock clock;
-    private final AuditEventPublisher auditEventPublisher;
 
     public TaskGroupServiceImpl(
             TaskGroupRepository groupRepository,
             TaskRepository taskRepository,
-            Clock clock,
-            AuditEventPublisher auditEventPublisher) {
+            Clock clock) {
         this.groupRepository = groupRepository;
         this.taskRepository = taskRepository;
         this.clock = clock;
-        this.auditEventPublisher = auditEventPublisher;
     }
 
     @Override
@@ -69,8 +65,6 @@ public class TaskGroupServiceImpl implements TaskGroupService {
                 now,
                 now);
         groupRepository.insert(group, taskIds, groupIds);
-        auditEventPublisher.publishCreated(
-                "SCHEDULER_TASK_GROUP_CREATED", "SCHEDULER_TASK_GROUP", group.id());
         return new CreateTaskGroupResponse(
                 group.id(),
                 group.name(),

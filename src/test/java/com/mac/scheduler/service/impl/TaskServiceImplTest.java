@@ -2,15 +2,12 @@ package com.mac.scheduler.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import com.mac.scheduler.config.properties.HttpTaskProperties;
 import com.mac.scheduler.entities.constant.HttpMethod;
 import com.mac.scheduler.entities.dto.CreateTaskRequest;
 import com.mac.scheduler.entities.model.ScheduledTask;
 import com.mac.scheduler.repository.TaskRepository;
-import com.mac.scheduler.service.AuditEventPublisher;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
@@ -31,12 +28,10 @@ class TaskServiceImplTest {
 
     private InMemoryTaskRepository repository;
     private TaskServiceImpl service;
-    private AuditEventPublisher auditEventPublisher;
 
     @BeforeEach
     void setUp() {
         repository = new InMemoryTaskRepository();
-        auditEventPublisher = mock(AuditEventPublisher.class);
         HttpTaskProperties properties = new HttpTaskProperties(
                 Duration.ofSeconds(2),
                 Duration.ofSeconds(20),
@@ -45,8 +40,7 @@ class TaskServiceImplTest {
         service = new TaskServiceImpl(
                 repository,
                 properties,
-                Clock.fixed(NOW, ZoneOffset.UTC),
-                auditEventPublisher);
+                Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     @Test
@@ -66,8 +60,6 @@ class TaskServiceImplTest {
         assertThat(repository.inserted.timeout()).isEqualTo(Duration.ofSeconds(20));
         assertThat(repository.inserted.enabled()).isTrue();
         assertThat(repository.inserted.headers()).containsEntry("Content-Type", "application/json");
-        verify(auditEventPublisher).publishCreated(
-                "SCHEDULER_TASK_CREATED", "SCHEDULER_TASK", response.taskId());
     }
 
     @Test

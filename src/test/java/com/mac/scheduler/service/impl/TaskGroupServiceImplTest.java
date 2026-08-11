@@ -2,8 +2,6 @@ package com.mac.scheduler.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import com.mac.scheduler.entities.constant.GroupExecutionMode;
 import com.mac.scheduler.entities.constant.HttpMethod;
@@ -12,7 +10,6 @@ import com.mac.scheduler.entities.model.ScheduledTask;
 import com.mac.scheduler.entities.model.TaskGroup;
 import com.mac.scheduler.repository.TaskGroupRepository;
 import com.mac.scheduler.repository.TaskRepository;
-import com.mac.scheduler.service.AuditEventPublisher;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
@@ -32,18 +29,15 @@ class TaskGroupServiceImplTest {
     private InMemoryTaskGroupRepository groupRepository;
     private InMemoryTaskRepository taskRepository;
     private TaskGroupServiceImpl service;
-    private AuditEventPublisher auditEventPublisher;
 
     @BeforeEach
     void setUp() {
         groupRepository = new InMemoryTaskGroupRepository();
         taskRepository = new InMemoryTaskRepository();
-        auditEventPublisher = mock(AuditEventPublisher.class);
         service = new TaskGroupServiceImpl(
                 groupRepository,
                 taskRepository,
-                Clock.fixed(NOW, ZoneOffset.UTC),
-                auditEventPublisher);
+                Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     @Test
@@ -60,8 +54,6 @@ class TaskGroupServiceImplTest {
 
         assertThat(response.groupIds()).containsExactly(child.id());
         assertThat(groupRepository.inserted.groups()).containsExactly(child);
-        verify(auditEventPublisher).publishCreated(
-                "SCHEDULER_TASK_GROUP_CREATED", "SCHEDULER_TASK_GROUP", response.groupId());
     }
 
     @Test
