@@ -13,4 +13,8 @@ public interface TaskGroupRepository {
             List<UUID> orderedChildGroupIds);
 
     Optional<TaskGroup> findById(UUID groupId);
+
+    default List<TaskGroup> findAll() {
+        return List.of();
+    }
 }

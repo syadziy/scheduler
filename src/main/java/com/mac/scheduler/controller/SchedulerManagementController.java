@@ -14,8 +14,10 @@ import com.mac.sdk_util.entities.constant.Role;
 import com.mac.sdk_util.helper.ResponseHelper;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +50,12 @@ public class SchedulerManagementController {
                 URI.create("/api/v1/tasks/" + response.taskId()));
     }
 
+    @GetMapping("/tasks")
+    @PreAuthorize(Role.SCHEDULER_READ)
+    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.ScheduledTask>>> findTasks() {
+        return ResponseHelper.httpOK(taskService.findAll());
+    }
+
     @PostMapping("/task-groups")
     @PreAuthorize(Role.SCHEDULER_MANAGE)
     public ResponseEntity<ResponseDTO<CreateTaskGroupResponse>> createTaskGroup(
@@ -58,6 +66,12 @@ public class SchedulerManagementController {
                 URI.create("/api/v1/task-groups/" + response.groupId()));
     }
 
+    @GetMapping("/task-groups")
+    @PreAuthorize(Role.SCHEDULER_READ)
+    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.TaskGroup>>> findTaskGroups() {
+        return ResponseHelper.httpOK(groupService.findAll());
+    }
+
     @PostMapping("/schedules")
     @PreAuthorize(Role.SCHEDULER_MANAGE)
     public ResponseEntity<ResponseDTO<CreateScheduleResponse>> createSchedule(
@@ -66,5 +80,11 @@ public class SchedulerManagementController {
         return ResponseHelper.httpCreated(
                 response,
                 URI.create("/api/v1/schedules/" + response.scheduleId()));
+    }
+
+    @GetMapping("/schedules")
+    @PreAuthorize(Role.SCHEDULER_READ)
+    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.ScheduleDefinition>>> findSchedules() {
+        return ResponseHelper.httpOK(scheduleService.findAll());
     }
 }

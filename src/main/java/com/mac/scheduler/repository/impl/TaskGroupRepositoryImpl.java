@@ -87,6 +87,14 @@ public class TaskGroupRepositoryImpl implements TaskGroupRepository {
         return findById(groupId, 1, new LinkedHashSet<>());
     }
 
+    @Override
+    public List<TaskGroup> findAll() {
+        List<UUID> ids = jdbcTemplate.query("""
+                SELECT id FROM scheduler_task_group ORDER BY created_at DESC, id
+                """, (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class));
+        return ids.stream().map(id -> findById(id).orElseThrow()).toList();
+    }
+
     private Optional<TaskGroup> findById(
             UUID groupId,
             int depth,

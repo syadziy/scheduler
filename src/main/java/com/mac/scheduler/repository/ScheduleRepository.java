@@ -10,6 +10,10 @@ public interface ScheduleRepository {
 
     ScheduleDefinition insert(ScheduleDefinition schedule);
 
+    default List<ScheduleDefinition> findAll() {
+        return List.of();
+    }
+
     List<ScheduleDefinition> findDueForUpdate(Instant dueAt, int limit);
 
     void updateNextExecution(ScheduleDefinition schedule, Instant nextExecutionAt, Instant updatedAt);

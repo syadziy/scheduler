@@ -12,5 +12,9 @@ public interface TaskRepository {
 
     Optional<ScheduledTask> findById(UUID taskId);
 
+    default List<ScheduledTask> findAll() {
+        return List.of();
+    }
+
     List<ScheduledTask> findByIds(Collection<UUID> taskIds);
 }

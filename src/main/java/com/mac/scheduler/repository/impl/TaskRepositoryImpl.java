@@ -80,6 +80,11 @@ public class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
+    public List<ScheduledTask> findAll() {
+        return jdbcTemplate.query(BASE_SELECT + " ORDER BY created_at DESC, id", rowMapper);
+    }
+
+    @Override
     public List<ScheduledTask> findByIds(Collection<UUID> taskIds) {
         if (taskIds == null || taskIds.isEmpty()) {
             return List.of();

@@ -14,6 +14,7 @@ import java.time.Clock;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -76,6 +77,11 @@ public class ScheduleServiceImpl implements ScheduleService {
                 targetId,
                 schedule.nextExecutionAt(),
                 schedule.createdAt());
+    }
+
+    @Override
+    public List<ScheduleDefinition> findAll() {
+        return scheduleRepository.findAll();
     }
 
     private void validateTarget(CreateScheduleRequest request) {

@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,11 @@ public class TaskServiceImpl implements TaskService {
         repository.insert(task);
         auditEventPublisher.publishCreated("SCHEDULER_TASK_CREATED", "SCHEDULER_TASK", task.id());
         return new CreateTaskResponse(task.id(), task.name(), task.createdAt());
+    }
+
+    @Override
+    public List<ScheduledTask> findAll() {
+        return repository.findAll();
     }
 
     private void validateEndpoint(URI endpoint) {

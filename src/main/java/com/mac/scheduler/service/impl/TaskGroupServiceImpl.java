@@ -80,6 +80,11 @@ public class TaskGroupServiceImpl implements TaskGroupService {
                 group.createdAt());
     }
 
+    @Override
+    public List<TaskGroup> findAll() {
+        return groupRepository.findAll();
+    }
+
     private static List<UUID> immutableOrEmpty(List<UUID> values) {
         return values == null ? List.of() : List.copyOf(values);
     }

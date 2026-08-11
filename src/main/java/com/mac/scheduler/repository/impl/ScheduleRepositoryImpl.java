@@ -55,6 +55,13 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
     }
 
     @Override
+    public List<ScheduleDefinition> findAll() {
+        return jdbcTemplate.query("""
+                SELECT %s FROM scheduler_schedule ORDER BY created_at DESC, id
+                """.formatted(COLUMNS), this::mapSchedule);
+    }
+
+    @Override
     public List<ScheduleDefinition> findDueForUpdate(Instant dueAt, int limit) {
         return jdbcTemplate.query("""
                 SELECT %s
