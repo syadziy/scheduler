@@ -96,6 +96,12 @@ class TaskGroupServiceImplTest {
                 .hasMessage("taskIds/groupIds: the same task cannot appear more than once in a hierarchy");
     }
 
+    @Test
+    void listsAndCountsTaskGroups() {
+        assertThat(service.findAll(10, 20)).isEmpty();
+        assertThat(service.count()).isZero();
+    }
+
     private static TaskGroup nestedGroup(int levels) {
         TaskGroup group = new TaskGroup(
                 UUID.randomUUID(),

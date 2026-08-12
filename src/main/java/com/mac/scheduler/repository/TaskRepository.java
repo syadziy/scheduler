@@ -16,5 +16,13 @@ public interface TaskRepository {
         return List.of();
     }
 
+    default List<ScheduledTask> findAll(int limit, int offset) {
+        return findAll().stream().skip(offset).limit(limit).toList();
+    }
+
+    default long count() {
+        return findAll().size();
+    }
+
     List<ScheduledTask> findByIds(Collection<UUID> taskIds);
 }

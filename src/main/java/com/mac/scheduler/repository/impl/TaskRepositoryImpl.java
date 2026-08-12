@@ -85,6 +85,20 @@ public class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
+    public List<ScheduledTask> findAll(int limit, int offset) {
+        return jdbcTemplate.query(BASE_SELECT + """
+                 ORDER BY created_at DESC, id
+                 LIMIT :limit OFFSET :offset
+                """, Map.of("limit", limit, "offset", offset), rowMapper);
+    }
+
+    @Override
+    public long count() {
+        Long total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM scheduler_task", Map.of(), Long.class);
+        return total == null ? 0 : total;
+    }
+
+    @Override
     public List<ScheduledTask> findByIds(Collection<UUID> taskIds) {
         if (taskIds == null || taskIds.isEmpty()) {
             return List.of();

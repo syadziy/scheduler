@@ -27,6 +27,38 @@ class RepositoryCoverageTest {
     private static final Instant NOW = Instant.parse("2026-01-02T03:04:05Z");
 
     @Test
+    void repositoriesApplyPaginationAndReturnCounts() {
+        NamedParameterJdbcTemplate taskJdbc = mock(NamedParameterJdbcTemplate.class);
+        ScheduledTask task = task(UUID.randomUUID());
+        when(taskJdbc.query(contains("LIMIT :limit OFFSET :offset"), anyMap(), any(RowMapper.class)))
+                .thenReturn(List.of(task));
+        when(taskJdbc.queryForObject(contains("COUNT(*) FROM scheduler_task"), anyMap(), eq(Long.class)))
+                .thenReturn(21L);
+        TaskRepositoryImpl tasks = new TaskRepositoryImpl(taskJdbc, new ObjectMapper());
+        assertEquals(List.of(task), tasks.findAll(10, 20));
+        assertEquals(21, tasks.count());
+
+        NamedParameterJdbcTemplate scheduleJdbc = mock(NamedParameterJdbcTemplate.class);
+        ScheduleDefinition schedule = schedule();
+        when(scheduleJdbc.query(contains("LIMIT :limit OFFSET :offset"), anyMap(), any(RowMapper.class)))
+                .thenReturn(List.of(schedule));
+        when(scheduleJdbc.queryForObject(contains("COUNT(*) FROM scheduler_schedule"), anyMap(), eq(Long.class)))
+                .thenReturn(12L);
+        ScheduleRepositoryImpl schedules = new ScheduleRepositoryImpl(scheduleJdbc);
+        assertEquals(List.of(schedule), schedules.findAll(10, 20));
+        assertEquals(12, schedules.count());
+
+        NamedParameterJdbcTemplate groupJdbc = mock(NamedParameterJdbcTemplate.class);
+        when(groupJdbc.query(contains("SELECT id FROM scheduler_task_group"), anyMap(), any(RowMapper.class)))
+                .thenReturn(List.of());
+        when(groupJdbc.queryForObject(contains("COUNT(*) FROM scheduler_task_group"), anyMap(), eq(Long.class)))
+                .thenReturn(7L);
+        TaskGroupRepositoryImpl groups = new TaskGroupRepositoryImpl(groupJdbc, new ObjectMapper());
+        assertTrue(groups.findAll(10, 20).isEmpty());
+        assertEquals(7, groups.count());
+    }
+
+    @Test
     void taskRepositoryCoversWritesReadsAndFailures() throws Exception {
         NamedParameterJdbcTemplate jdbc = mock(NamedParameterJdbcTemplate.class);
         ObjectMapper mapper = new ObjectMapper();

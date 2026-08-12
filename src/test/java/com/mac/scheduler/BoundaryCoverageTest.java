@@ -53,6 +53,9 @@ class BoundaryCoverageTest {
                 groupId, "group", GroupExecutionMode.SERIAL, List.of(taskId), List.of(), NOW));
         when(scheduleService.create(scheduleRequest)).thenReturn(new CreateScheduleResponse(
                 scheduleId, "schedule", ScheduleTargetType.TASK, taskId, NOW, NOW));
+        when(taskService.count()).thenReturn(31L);
+        when(groupService.count()).thenReturn(12L);
+        when(scheduleService.count()).thenReturn(7L);
 
         var taskResponse = controller.createTask(taskRequest);
         var groupResponse = controller.createTaskGroup(groupRequest);
@@ -61,6 +64,9 @@ class BoundaryCoverageTest {
         assertEquals("/api/v1/tasks/" + taskId, taskResponse.getHeaders().getLocation().toString());
         assertEquals("/api/v1/task-groups/" + groupId, groupResponse.getHeaders().getLocation().toString());
         assertEquals("/api/v1/schedules/" + scheduleId, scheduleResponse.getHeaders().getLocation().toString());
+        assertEquals(31, controller.findTasks(10, 0).getBody().getPaging().getTotalRecord());
+        assertEquals(12, controller.findTaskGroups(10, 0).getBody().getPaging().getTotalRecord());
+        assertEquals(7, controller.findSchedules(10, 0).getBody().getPaging().getTotalRecord());
     }
 
     @Test

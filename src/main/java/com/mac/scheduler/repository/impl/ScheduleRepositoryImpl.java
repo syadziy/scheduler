@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -59,6 +60,22 @@ public class ScheduleRepositoryImpl implements ScheduleRepository {
         return jdbcTemplate.query("""
                 SELECT %s FROM scheduler_schedule ORDER BY created_at DESC, id
                 """.formatted(COLUMNS), this::mapSchedule);
+    }
+
+    @Override
+    public List<ScheduleDefinition> findAll(int limit, int offset) {
+        return jdbcTemplate.query("""
+                SELECT %s FROM scheduler_schedule
+                ORDER BY created_at DESC, id
+                LIMIT :limit OFFSET :offset
+                """.formatted(COLUMNS), Map.of("limit", limit, "offset", offset), this::mapSchedule);
+    }
+
+    @Override
+    public long count() {
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM scheduler_schedule", Map.of(), Long.class);
+        return total == null ? 0 : total;
     }
 
     @Override

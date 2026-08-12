@@ -92,6 +92,12 @@ class TaskServiceImplTest {
                 .hasMessage("headers: X-Correlation-Id is managed by the scheduler");
     }
 
+    @Test
+    void listsAndCountsTasks() {
+        assertThat(service.findAll(10, 20)).isEmpty();
+        assertThat(service.count()).isZero();
+    }
+
     private static final class InMemoryTaskRepository implements TaskRepository {
 
         private ScheduledTask inserted;

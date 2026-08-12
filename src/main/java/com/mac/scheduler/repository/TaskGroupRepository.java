@@ -17,4 +17,12 @@ public interface TaskGroupRepository {
     default List<TaskGroup> findAll() {
         return List.of();
     }
+
+    default List<TaskGroup> findAll(int limit, int offset) {
+        return findAll().stream().skip(offset).limit(limit).toList();
+    }
+
+    default long count() {
+        return findAll().size();
+    }
 }

@@ -279,6 +279,9 @@ Current contracts:
 
 ## Performance
 
+- Every list endpoint must accept validated `limit` and `offset`, use stable SQL ordering with
+  `LIMIT/OFFSET`, and return `paging.limit`, `paging.offset`, and `paging.total_record` from a
+  matching unpaginated `COUNT`. Never derive the total from the current page size.
 - Preserve global semaphore limits.
 - Do not replace virtual threads with an unbounded platform-thread pool.
 - Keep claim batch bounded.

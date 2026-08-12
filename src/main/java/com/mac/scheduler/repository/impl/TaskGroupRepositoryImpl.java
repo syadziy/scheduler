@@ -95,6 +95,24 @@ public class TaskGroupRepositoryImpl implements TaskGroupRepository {
         return ids.stream().map(id -> findById(id).orElseThrow()).toList();
     }
 
+    @Override
+    public List<TaskGroup> findAll(int limit, int offset) {
+        List<UUID> ids = jdbcTemplate.query("""
+                SELECT id FROM scheduler_task_group
+                ORDER BY created_at DESC, id
+                LIMIT :limit OFFSET :offset
+                """, Map.of("limit", limit, "offset", offset),
+                (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class));
+        return ids.stream().map(id -> findById(id).orElseThrow()).toList();
+    }
+
+    @Override
+    public long count() {
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM scheduler_task_group", Map.of(), Long.class);
+        return total == null ? 0 : total;
+    }
+
     private Optional<TaskGroup> findById(
             UUID groupId,
             int depth,

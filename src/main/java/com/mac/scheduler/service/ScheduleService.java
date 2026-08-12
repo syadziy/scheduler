@@ -9,5 +9,7 @@ public interface ScheduleService {
 
     CreateScheduleResponse create(CreateScheduleRequest request);
 
-    List<ScheduleDefinition> findAll();
+    List<ScheduleDefinition> findAll(int limit, int offset);
+
+    long count();
 }

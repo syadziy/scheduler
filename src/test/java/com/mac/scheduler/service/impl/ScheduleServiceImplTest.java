@@ -124,6 +124,12 @@ class ScheduleServiceImplTest {
                 .hasMessage("Task was not found");
     }
 
+    @Test
+    void listsAndCountsSchedules() {
+        assertThat(service.findAll(10, 20)).isEmpty();
+        assertThat(service.count()).isZero();
+    }
+
     private static ScheduledTask task() {
         return new ScheduledTask(
                 TASK_ID,

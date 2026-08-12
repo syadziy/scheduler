@@ -63,8 +63,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<ScheduledTask> findAll() {
-        return repository.findAll();
+    public List<ScheduledTask> findAll(int limit, int offset) {
+        return repository.findAll(limit, offset);
+    }
+
+    @Override
+    public long count() {
+        return repository.count();
     }
 
     private void validateEndpoint(URI endpoint) {

@@ -10,9 +10,13 @@ import com.mac.scheduler.service.ScheduleService;
 import com.mac.scheduler.service.TaskGroupService;
 import com.mac.scheduler.service.TaskService;
 import com.mac.sdk_util.entities.dto.ResponseDTO;
+import com.mac.sdk_util.entities.dto.PagingDTO;
 import com.mac.sdk_util.entities.constant.Role;
 import com.mac.sdk_util.helper.ResponseHelper;
+import com.mac.sdk_util.helper.ResponsePagingHelper;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -52,8 +57,11 @@ public class SchedulerManagementController {
 
     @GetMapping("/tasks")
     @PreAuthorize(Role.SCHEDULER_READ)
-    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.ScheduledTask>>> findTasks() {
-        return ResponseHelper.httpOK(taskService.findAll());
+    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.ScheduledTask>>> findTasks(
+            @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit,
+            @RequestParam(defaultValue = "0") @Min(0) int offset) {
+        return ResponsePagingHelper.httpOK(taskService.findAll(limit, offset),
+                new PagingDTO(limit, offset, taskService.count()));
     }
 
     @PostMapping("/task-groups")
@@ -68,8 +76,11 @@ public class SchedulerManagementController {
 
     @GetMapping("/task-groups")
     @PreAuthorize(Role.SCHEDULER_READ)
-    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.TaskGroup>>> findTaskGroups() {
-        return ResponseHelper.httpOK(groupService.findAll());
+    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.TaskGroup>>> findTaskGroups(
+            @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit,
+            @RequestParam(defaultValue = "0") @Min(0) int offset) {
+        return ResponsePagingHelper.httpOK(groupService.findAll(limit, offset),
+                new PagingDTO(limit, offset, groupService.count()));
     }
 
     @PostMapping("/schedules")
@@ -84,7 +95,10 @@ public class SchedulerManagementController {
 
     @GetMapping("/schedules")
     @PreAuthorize(Role.SCHEDULER_READ)
-    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.ScheduleDefinition>>> findSchedules() {
-        return ResponseHelper.httpOK(scheduleService.findAll());
+    public ResponseEntity<ResponseDTO<List<com.mac.scheduler.entities.model.ScheduleDefinition>>> findSchedules(
+            @RequestParam(defaultValue = "10") @Min(1) @Max(500) int limit,
+            @RequestParam(defaultValue = "0") @Min(0) int offset) {
+        return ResponsePagingHelper.httpOK(scheduleService.findAll(limit, offset),
+                new PagingDTO(limit, offset, scheduleService.count()));
     }
 }

@@ -75,8 +75,13 @@ public class TaskGroupServiceImpl implements TaskGroupService {
     }
 
     @Override
-    public List<TaskGroup> findAll() {
-        return groupRepository.findAll();
+    public List<TaskGroup> findAll(int limit, int offset) {
+        return groupRepository.findAll(limit, offset);
+    }
+
+    @Override
+    public long count() {
+        return groupRepository.count();
     }
 
     private static List<UUID> immutableOrEmpty(List<UUID> values) {

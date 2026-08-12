@@ -9,5 +9,7 @@ public interface TaskService {
 
     CreateTaskResponse create(CreateTaskRequest request);
 
-    List<ScheduledTask> findAll();
+    List<ScheduledTask> findAll(int limit, int offset);
+
+    long count();
 }

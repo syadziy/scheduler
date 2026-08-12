@@ -74,8 +74,13 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public List<ScheduleDefinition> findAll() {
-        return scheduleRepository.findAll();
+    public List<ScheduleDefinition> findAll(int limit, int offset) {
+        return scheduleRepository.findAll(limit, offset);
+    }
+
+    @Override
+    public long count() {
+        return scheduleRepository.count();
     }
 
     private void validateTarget(CreateScheduleRequest request) {

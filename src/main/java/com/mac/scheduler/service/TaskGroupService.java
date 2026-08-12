@@ -9,5 +9,7 @@ public interface TaskGroupService {
 
     CreateTaskGroupResponse create(CreateTaskGroupRequest request);
 
-    List<TaskGroup> findAll();
+    List<TaskGroup> findAll(int limit, int offset);
+
+    long count();
 }

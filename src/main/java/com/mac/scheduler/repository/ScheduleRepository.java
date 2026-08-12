@@ -14,6 +14,14 @@ public interface ScheduleRepository {
         return List.of();
     }
 
+    default List<ScheduleDefinition> findAll(int limit, int offset) {
+        return findAll().stream().skip(offset).limit(limit).toList();
+    }
+
+    default long count() {
+        return findAll().size();
+    }
+
     List<ScheduleDefinition> findDueForUpdate(Instant dueAt, int limit);
 
     void updateNextExecution(ScheduleDefinition schedule, Instant nextExecutionAt, Instant updatedAt);
